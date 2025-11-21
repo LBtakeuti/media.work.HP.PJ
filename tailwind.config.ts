@@ -29,9 +29,14 @@ const config: Config = {
           "0%": { opacity: "0", transform: "scale(0.95)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        grid: {
+          "0%": { transform: "translateY(-50%)" },
+          "100%": { transform: "translateY(0)" },
+        },
       },
       animation: {
         "appear-zoom": "appear-zoom 0.5s ease-out forwards",
+        grid: "grid 15s linear infinite",
       },
     },
   },

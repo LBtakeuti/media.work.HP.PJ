@@ -8,17 +8,17 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white sticky top-0 z-50 border-b-0">
+    <header className="bg-white sticky top-0 z-[100] border-b-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="relative flex justify-center md:justify-between items-center h-[80px]">
           <div className="flex-shrink-0">
-            <Link href="/" className="block">
+            <Link href="/" className="block group">
               <Image
                 src="/logo.jpg"
                 alt="コーポレートサイト"
                 width={250}
                 height={80}
-                className="h-16 w-auto object-contain"
+                className="h-16 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
                 priority
               />
             </Link>
@@ -28,33 +28,33 @@ export default function Header() {
           <nav className="hidden md:flex space-x-8">
             <Link
               href="/news"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors"
+              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
             >
-              ニュース
+              NEWS
             </Link>
             <Link
               href="/company"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors"
+              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
             >
-              企業情報
+              COMPANY
             </Link>
             <Link
               href="/services"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors"
+              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
             >
-              事業案内
+              SERVICES
             </Link>
             <Link
               href="/contact"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors"
+              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
             >
-              お問い合わせ
+              CONTACT
             </Link>
           </nav>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary-600 focus:outline-none"
+            className="md:hidden absolute right-0 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary-600 focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg
@@ -83,40 +83,42 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
+        <div
+          className={`md:hidden absolute top-full left-0 right-0 bg-white border-t shadow-lg overflow-hidden transition-all duration-300 ease-in-out z-[100] ${
+            isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
                 href="/news"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
-                ニュース
+                NEWS
               </Link>
               <Link
                 href="/company"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
-                企業情報
+                COMPANY
               </Link>
               <Link
                 href="/services"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
-                事業案内
+                SERVICES
               </Link>
               <Link
                 href="/contact"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
-                お問い合わせ
+                CONTACT
               </Link>
-            </div>
           </div>
-        )}
+        </div>
       </div>
     </header>
   );

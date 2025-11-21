@@ -2,34 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
-  --brand: 27 96% 61%;
-  --brand-foreground: 31 97% 72%;
-}
-
-.dark {
-  --brand: 31 97% 72%;
-  --brand-foreground: 27 96% 61%;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  :root {
+    --brand: 27 96% 61%;
+    --brand-foreground: 31 97% 72%;
+  }
+  .dark {
+    --brand: 31 97% 72%;
+    --brand-foreground: 27 96% 61%
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  
   .glow-effect {
     position: relative;
     overflow: hidden;
@@ -56,3 +40,123 @@ body {
   }
 }
 
+/* Prose styles for article content */
+.prose {
+  color: #374151;
+  max-width: 65ch;
+}
+
+.prose p {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  line-height: 1.3333333;
+}
+
+.prose h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  line-height: 1.6;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  padding-left: 1.625em;
+  list-style-type: disc; /* 箇条書きのマーカーを表示 */
+}
+
+.prose ul {
+  list-style-type: disc; /* 箇条書きは黒丸 */
+}
+
+.prose ol {
+  list-style-type: decimal; /* 番号付きリストは数字 */
+}
+
+.prose li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  display: list-item; /* リストアイテムとして表示 */
+  list-style-position: outside; /* マーカーを外側に配置 */
+}
+
+.prose img {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border-radius: 0.5rem;
+}
+
+.prose blockquote {
+  font-weight: 500;
+  font-style: italic;
+  color: #111827;
+  border-left-width: 0.25rem;
+  border-left-color: #e5e7eb;
+  quotes: "\201C""\201D""\2018""\2019";
+  margin-top: 1.6em;
+  margin-bottom: 1.6em;
+  padding-left: 1em;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+}
+
+.prose strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.prose code {
+  color: #111827;
+  font-weight: 600;
+  font-size: 0.875em;
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.prose pre {
+  color: #e5e7eb;
+  background-color: #1f2937;
+  overflow-x: auto;
+  font-size: 0.875em;
+  line-height: 1.7142857;
+  margin-top: 1.7142857em;
+  margin-bottom: 1.7142857em;
+  border-radius: 0.375rem;
+  padding-top: 0.8571429em;
+  padding-right: 1.1428571em;
+  padding-bottom: 0.8571429em;
+  padding-left: 1.1428571em;
+}
+
+/* Retro Grid Animation */
+@keyframes grid {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-grid {
+  animation: grid 15s linear infinite;
+}

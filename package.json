@@ -1,5 +1,5 @@
 {
-  "name": "corporate-website",
+  "name": "media-work-corporate-site",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.4",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^3.6.0",
     "next": "14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.1",
+    "date-fns": "^3.6.0",
     "sharp": "^0.33.2",
-    "tailwind-merge": "^3.4.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "framer-motion": "^11.0.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.0",
+    "@tiptap/react": "^2.1.13",
+    "@tiptap/starter-kit": "^2.1.13",
+    "@tiptap/extension-underline": "^2.1.13",
+    "@tiptap/extension-text-style": "^2.1.13",
+    "@tiptap/extension-color": "^2.1.13",
+    "@tiptap/extension-link": "^2.1.13",
+    "@tiptap/extension-image": "^2.1.13",
+    "@tiptap/extension-text-align": "^2.1.13"
   },
   "devDependencies": {
     "@types/node": "^20.14.12",

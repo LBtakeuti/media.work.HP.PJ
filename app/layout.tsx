@@ -1,10 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const inter = Inter({ subsets: ["latin"] });
+const lineSeedJP = localFont({
+  src: [
+    {
+      path: "../public/fonts/LINESeedJP_OTF_Rg.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/LINESeedJP_OTF_Bd.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-line-seed",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "コーポレートサイト",
@@ -18,10 +33,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={inter.className}>
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+      <body className={lineSeedJP.className}>
+        {children}
       </body>
     </html>
   );

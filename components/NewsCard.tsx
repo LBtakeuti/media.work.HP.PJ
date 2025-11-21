@@ -6,19 +6,18 @@ import { ja } from "date-fns/locale";
 
 interface NewsCardProps {
   item: NewsItem;
-  imageSrc?: string;
 }
 
-export default function NewsCard({ item, imageSrc = "/sevilla-tower-g8a5d080a4_640.jpg" }: NewsCardProps) {
+export default function NewsCard({ item }: NewsCardProps) {
   return (
     <Link
-      href={`/news#${item.id}`}
+      href={`/news/${item.id}`}
       className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow border border-gray-100 group"
     >
       {/* Image Section */}
       <div className="relative h-56 bg-gray-50">
         <Image
-          src={imageSrc}
+          src={item.image || "/sevilla-tower-g8a5d080a4_640.jpg"}
           alt={item.title}
           fill
           className="object-cover"

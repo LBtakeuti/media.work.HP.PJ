@@ -1,51 +1,41 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getNews, saveNews } from "@/lib/data";
-import { randomUUID } from "crypto";
 
 export async function GET() {
   try {
     const news = await getNews();
     return NextResponse.json(news);
   } catch (error) {
-    console.error("Error fetching news:", error);
+    console.error("Failed to get news:", error);
     return NextResponse.json(
-      { error: "ニュースの取得に失敗しました" },
+      { error: "Failed to get news" },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, content, date, category } = body;
-
-    if (!title || !content || !date || !category) {
-      return NextResponse.json(
-        { error: "すべての項目を入力してください" },
-        { status: 400 }
-      );
-    }
-
     const news = await getNews();
-    const newItem = {
-      id: randomUUID(),
-      title,
-      content,
-      date,
-      category,
+    
+    // Generate new ID
+    const newId = String(Math.max(0, ...news.map(n => parseInt(n.id) || 0)) + 1);
+    
+    const newNews = {
+      ...body,
+      id: newId,
     };
-
-    news.unshift(newItem); // Add to beginning
+    
+    news.unshift(newNews);
     await saveNews(news);
-
-    return NextResponse.json({ success: true }, { status: 200 });
+    
+    return NextResponse.json(newNews);
   } catch (error) {
-    console.error("Error saving news:", error);
+    console.error("Failed to create news:", error);
     return NextResponse.json(
-      { error: "ニュースの保存に失敗しました" },
+      { error: "Failed to create news" },
       { status: 500 }
     );
   }
 }
-

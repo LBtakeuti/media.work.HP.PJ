@@ -1,101 +1,85 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getNews, saveNews } from "@/lib/data";
 
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const news = await getNews();
     const item = news.find((n) => n.id === params.id);
-
+    
     if (!item) {
       return NextResponse.json(
-        { error: "ニュースが見つかりません" },
+        { error: "News not found" },
         { status: 404 }
       );
     }
-
+    
     return NextResponse.json(item);
   } catch (error) {
-    console.error("Error fetching news:", error);
+    console.error("Failed to get news:", error);
     return NextResponse.json(
-      { error: "ニュースの取得に失敗しました" },
+      { error: "Failed to get news" },
       { status: 500 }
     );
   }
 }
 
 export async function PUT(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const body = await request.json();
-    const { title, content, date, category } = body;
-
-    if (!title || !content || !date || !category) {
-      return NextResponse.json(
-        { error: "すべての項目を入力してください" },
-        { status: 400 }
-      );
-    }
-
     const news = await getNews();
     const index = news.findIndex((n) => n.id === params.id);
-
+    
     if (index === -1) {
       return NextResponse.json(
-        { error: "ニュースが見つかりません" },
+        { error: "News not found" },
         { status: 404 }
       );
     }
-
+    
     news[index] = {
-      ...news[index],
-      title,
-      content,
-      date,
-      category,
+      ...body,
+      id: params.id,
     };
-
+    
     await saveNews(news);
-
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json(news[index]);
   } catch (error) {
-    console.error("Error updating news:", error);
+    console.error("Failed to update news:", error);
     return NextResponse.json(
-      { error: "ニュースの更新に失敗しました" },
+      { error: "Failed to update news" },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const news = await getNews();
-    const filteredNews = news.filter((n) => n.id !== params.id);
-
-    if (news.length === filteredNews.length) {
+    const filtered = news.filter((n) => n.id !== params.id);
+    
+    if (filtered.length === news.length) {
       return NextResponse.json(
-        { error: "ニュースが見つかりません" },
+        { error: "News not found" },
         { status: 404 }
       );
     }
-
-    await saveNews(filteredNews);
-
-    return NextResponse.json({ success: true }, { status: 200 });
+    
+    await saveNews(filtered);
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting news:", error);
+    console.error("Failed to delete news:", error);
     return NextResponse.json(
-      { error: "ニュースの削除に失敗しました" },
+      { error: "Failed to delete news" },
       { status: 500 }
     );
   }
 }
-
-
