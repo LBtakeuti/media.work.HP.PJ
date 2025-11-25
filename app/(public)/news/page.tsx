@@ -1,6 +1,17 @@
 import { getNews } from "@/lib/data";
 import NewsCard from "@/components/NewsCard";
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "ニュース | 株式会社メディア・ワーク",
+  description: "株式会社メディア・ワークの最新ニュース、お知らせをご紹介します。",
+  openGraph: {
+    title: "ニュース | 株式会社メディア・ワーク",
+    description: "株式会社メディア・ワークの最新ニュース、お知らせをご紹介します。",
+    images: ["/logo.jpg"],
+  },
+};
 
 export default async function NewsPage() {
   const newsItems = await getNews();

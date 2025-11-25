@@ -6,6 +6,17 @@ import ServiceCard from "@/components/ServiceCard";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 import AnimatedTitle from "@/components/AnimatedTitle";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "株式会社メディア・ワーク",
+  description: "1975年創業、東京の印刷製版会社から進化したメディア制作のプロ集団。組版・グラフィックデザインからAI動画撮影サービスSAVREQ、Web制作まで、企画から運営までワンストップでサポート。伝統と革新を融合し、心に残る瞬間を未来へ届けます。",
+  openGraph: {
+    title: "株式会社メディア・ワーク",
+    description: "1975年創業、東京の印刷製版会社から進化したメディア制作のプロ集団。組版・グラフィックデザインからAI動画撮影サービスSAVREQ、Web制作まで、企画から運営までワンストップでサポート。伝統と革新を融合し、心に残る瞬間を未来へ届けます。",
+    images: ["/logo.jpg"],
+  },
+};
 
 export default async function Home() {
   const newsItems = await getNews();

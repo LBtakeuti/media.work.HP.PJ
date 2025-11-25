@@ -2,6 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import ServiceCard from "@/components/ServiceCard";
 import { getServices } from "@/lib/data";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "サービス | 株式会社メディア・ワーク",
+  description: "株式会社メディア・ワークが提供するサービスをご紹介します。",
+  openGraph: {
+    title: "サービス | 株式会社メディア・ワーク",
+    description: "株式会社メディア・ワークが提供するサービスをご紹介します。",
+    images: ["/logo.jpg"],
+  },
+};
 
 export default async function ServicesPage() {
   const services = await getServices();

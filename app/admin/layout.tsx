@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { authService } from "@/lib/auth";
 
 export default function AdminLayout({
   children,
@@ -14,6 +15,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
 
   useEffect(() => {
     // Skip authentication check for login page
@@ -23,19 +25,49 @@ export default function AdminLayout({
     }
 
     // Check authentication
-    const authenticated = sessionStorage.getItem("adminAuthenticated");
-    if (authenticated === "true") {
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    } else {
-      router.push("/admin/login");
-    }
+    const checkAuth = async () => {
+      try {
+        const session = await authService.getSession();
+        if (session && session.user) {
+          setIsAuthenticated(true);
+          setUserEmail(session.user.email || "");
+          setIsLoading(false);
+        } else {
+          router.push("/admin/login");
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        router.push("/admin/login");
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = authService.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_OUT" || !session) {
+          setIsAuthenticated(false);
+          router.push("/admin/login");
+        } else if (event === "SIGNED_IN" && session) {
+          setIsAuthenticated(true);
+          setUserEmail(session.user.email || "");
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [pathname, router]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminAuthenticated");
-    sessionStorage.removeItem("adminLoginTime");
-    router.push("/admin/login");
+  const handleLogout = async () => {
+    try {
+      await authService.signOut();
+      router.push("/admin/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   // Show login page without layout
@@ -81,6 +113,11 @@ export default function AdminLayout({
               />
             </div>
             <div className="flex items-center gap-4">
+              {userEmail && (
+                <span className="text-sm text-gray-600">
+                  {userEmail}
+                </span>
+              )}
               <Link
                 href="/"
                 target="_blank"
@@ -90,7 +127,7 @@ export default function AdminLayout({
               </Link>
               <button
                 onClick={handleLogout}
-                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md transition-colors"
               >
                 ログアウト
               </button>

@@ -19,6 +19,7 @@ Next.jsとTailwind CSSを使用したコーポレートサイトです。LINEヤ
 - **Tailwind CSS**
 - **React Hook Form**
 - **date-fns**
+- **Supabase** (Authentication & Database)
 
 ## セットアップ
 
@@ -28,7 +29,37 @@ Next.jsとTailwind CSSを使用したコーポレートサイトです。LINEヤ
 npm install
 ```
 
-### 2. 開発サーバーの起動
+### 2. 環境変数の設定
+
+`.env.local` ファイルをプロジェクトルートに作成し、以下の環境変数を設定してください：
+
+```env
+# Supabase設定
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Slack通知（オプション）
+SLACK_WEBHOOK_URL=your_slack_webhook_url
+
+# サイトURL
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+**Supabase設定の取得方法：**
+1. [Supabase](https://supabase.com/)でプロジェクトを作成
+2. Settings > API から以下を取得：
+   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public` キー → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 3. Supabaseでユーザーを作成
+
+管理画面にアクセスするためのユーザーをSupabaseで作成します：
+
+1. Supabaseダッシュボードで `Authentication` > `Users` を開く
+2. `Add User` をクリック
+3. メールアドレスとパスワードを入力して作成
+
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev

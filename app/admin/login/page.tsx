@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { authService } from "@/lib/auth";
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -15,17 +17,16 @@ export default function AdminLoginPage() {
     setError("");
     setIsLoading(true);
 
-    // Simple front-end only authentication
-    // In production, this should be replaced with proper authentication
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin123";
-
-    if (password === adminPassword) {
-      // Store authentication in sessionStorage
-      sessionStorage.setItem("adminAuthenticated", "true");
-      sessionStorage.setItem("adminLoginTime", new Date().toISOString());
+    try {
+      await authService.signIn(email, password);
       router.push("/admin/dashboard");
-    } else {
-      setError("パスワードが正しくありません");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.message.includes("Invalid login credentials")) {
+        setError("メールアドレスまたはパスワードが正しくありません");
+      } else {
+        setError(err.message || "ログインに失敗しました");
+      }
       setIsLoading(false);
     }
   };
@@ -50,6 +51,28 @@ export default function AdminLoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                メールアドレス
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="email@example.com"
+                />
+              </div>
+            </div>
+
             <div>
               <label
                 htmlFor="password"
@@ -105,19 +128,6 @@ export default function AdminLoginPage() {
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  開発用パスワード: admin123
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,16 @@
 import Image from "next/image";
 import { RetroGrid } from "@/components/ui/retro-grid";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "会社情報 | 株式会社メディア・ワーク",
+  description: "株式会社メディア・ワークの会社概要、企業理念、沿革などをご紹介します。",
+  openGraph: {
+    title: "会社情報 | 株式会社メディア・ワーク",
+    description: "株式会社メディア・ワークの会社概要、企業理念、沿革などをご紹介します。",
+    images: ["/logo.jpg"],
+  },
+};
 
 export default function CompanyPage() {
   return (
@@ -39,7 +50,7 @@ export default function CompanyPage() {
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-b-2 border-gray-300 pb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-b-2 border-gray-300 pb-4">
               メディア・ワークについて
             </h2>
           </div>
@@ -64,7 +75,7 @@ export default function CompanyPage() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="prose prose-lg max-w-none">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">会社概要</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">会社概要</h2>
             <div>
               <dl className="space-y-6">
                 <div className="border-b border-gray-200 pb-6">
