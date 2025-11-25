@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { NewsItem } from "@/lib/data";
+import { NewsItem } from "@/lib/supabase-data";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 

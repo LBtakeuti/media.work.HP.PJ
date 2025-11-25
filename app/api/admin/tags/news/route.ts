@@ -1,32 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { createClient } from '@supabase/supabase-js';
 
-const DATA_FILE = path.join(process.cwd(), "data", "news-tags.json");
+// Service role clientを使ってRLSをバイパス
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-interface Tag {
-  id: string;
-  name: string;
-  createdAt: string;
-}
-
-// Ensure data directory and file exist
-async function ensureDataFile() {
-  try {
-    await fs.access(DATA_FILE);
-  } catch {
-    await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-    await fs.writeFile(DATA_FILE, JSON.stringify([]));
-  }
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }
 
 // GET: Fetch all news tags
 export async function GET() {
   try {
-    await ensureDataFile();
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    const tags: Tag[] = JSON.parse(data);
-    return NextResponse.json(tags);
+    const supabase = getSupabaseAdmin();
+    
+    const { data: tags, error } = await supabase
+      .from('news_tags')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching news tags:', error);
+      throw error;
+    }
+
+    return NextResponse.json(tags || []);
   } catch (error) {
     console.error("Error reading news tags:", error);
     return NextResponse.json({ error: "Failed to load news tags" }, { status: 500 });
@@ -43,23 +46,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid tag name" }, { status: 400 });
     }
 
-    await ensureDataFile();
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    const tags: Tag[] = JSON.parse(data);
+    // Create slug from name
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '');
 
-    // Check for duplicates
-    if (tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase())) {
-      return NextResponse.json({ error: "Tag already exists" }, { status: 400 });
+    const supabase = getSupabaseAdmin();
+    
+    const { data: newTag, error } = await supabase
+      .from('news_tags')
+      .insert([{
+        name,
+        slug,
+        sort_order: 0,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating news tag:', error);
+      throw error;
     }
-
-    const newTag: Tag = {
-      id: String(Date.now()),
-      name,
-      createdAt: new Date().toISOString(),
-    };
-
-    tags.push(newTag);
-    await fs.writeFile(DATA_FILE, JSON.stringify(tags, null, 2));
 
     return NextResponse.json(newTag, { status: 201 });
   } catch (error) {

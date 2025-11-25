@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { authService } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({
   children,
@@ -27,7 +27,7 @@ export default function AdminLayout({
     // Check authentication
     const checkAuth = async () => {
       try {
-        const session = await authService.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) {
           setIsAuthenticated(true);
           setUserEmail(session.user.email || "");
@@ -44,7 +44,7 @@ export default function AdminLayout({
     checkAuth();
 
     // Listen for auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange(
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_OUT" || !session) {
           setIsAuthenticated(false);
@@ -63,7 +63,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      await authService.signOut();
+      await supabase.auth.signOut();
       router.push("/admin/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -93,6 +93,7 @@ export default function AdminLayout({
     { href: "/admin/dashboard", label: "ダッシュボード" },
     { href: "/admin/news", label: "ニュース管理" },
     { href: "/admin/services", label: "サービス管理" },
+    { href: "/admin/contacts", label: "お問い合わせ" },
     { href: "/admin/tags/news", label: "ニュースタグマスタ" },
     { href: "/admin/tags/services", label: "サービスタグマスタ" },
   ];

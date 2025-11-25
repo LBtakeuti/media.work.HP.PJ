@@ -1,22 +1,40 @@
 import { NextResponse } from "next/server";
-import { getNews, saveNews } from "@/lib/data";
+import { createClient } from '@supabase/supabase-js';
+
+// Service role clientを使ってRLSをバイパス
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const news = await getNews();
-    const item = news.find((n) => n.id === params.id);
+    const supabase = getSupabaseAdmin();
     
-    if (!item) {
+    const { data: news, error } = await supabase
+      .from('news')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    
+    if (error || !news) {
       return NextResponse.json(
         { error: "News not found" },
         { status: 404 }
       );
     }
     
-    return NextResponse.json(item);
+    return NextResponse.json(news);
   } catch (error) {
     console.error("Failed to get news:", error);
     return NextResponse.json(
@@ -32,23 +50,34 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const news = await getNews();
-    const index = news.findIndex((n) => n.id === params.id);
+    const supabase = getSupabaseAdmin();
     
-    if (index === -1) {
-      return NextResponse.json(
-        { error: "News not found" },
-        { status: 404 }
-      );
+    // tagsを除外してslugを生成
+    const { tags, ...dbNews } = body;
+    const updateData = dbNews.title
+      ? {
+          ...dbNews,
+          slug: dbNews.title
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .substring(0, 100),
+        }
+      : dbNews;
+    
+    const { data: updatedNews, error } = await supabase
+      .from('news')
+      .update(updateData)
+      .eq('id', params.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating news:', error);
+      throw error;
     }
     
-    news[index] = {
-      ...body,
-      id: params.id,
-    };
-    
-    await saveNews(news);
-    return NextResponse.json(news[index]);
+    return NextResponse.json(updatedNews);
   } catch (error) {
     console.error("Failed to update news:", error);
     return NextResponse.json(
@@ -63,17 +92,21 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const news = await getNews();
-    const filtered = news.filter((n) => n.id !== params.id);
+    const supabase = getSupabaseAdmin();
     
-    if (filtered.length === news.length) {
-      return NextResponse.json(
-        { error: "News not found" },
-        { status: 404 }
-      );
+    console.log('Attempting to delete news with ID:', params.id);
+    
+    const { error } = await supabase
+      .from('news')
+      .delete()
+      .eq('id', params.id);
+    
+    if (error) {
+      console.error('Supabase delete error:', error);
+      throw error;
     }
     
-    await saveNews(filtered);
+    console.log('News deleted successfully:', params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete news:", error);

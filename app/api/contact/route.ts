@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveContact } from "@/lib/data";
-import { randomUUID } from "crypto";
+import { saveContact } from "@/lib/supabase-data";
 
 // レート制限の設定
 const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5分（ミリ秒）
@@ -69,16 +68,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const contact = {
-      id: randomUUID(),
+    await saveContact({
       name,
       email,
       subject,
       message,
-      createdAt: new Date().toISOString(),
-    };
-
-    await saveContact(contact);
+      status: '未対応',
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

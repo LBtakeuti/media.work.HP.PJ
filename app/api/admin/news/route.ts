@@ -1,10 +1,34 @@
 import { NextResponse } from "next/server";
-import { getNews, saveNews } from "@/lib/data";
+import { createClient } from '@supabase/supabase-js';
+
+// Service role clientを使ってRLSをバイパス
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 export async function GET() {
   try {
-    const news = await getNews();
-    return NextResponse.json(news);
+    const supabase = getSupabaseAdmin();
+    
+    const { data: news, error } = await supabase
+      .from('news')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching news:', error);
+      throw error;
+    }
+
+    return NextResponse.json(news || []);
   } catch (error) {
     console.error("Failed to get news:", error);
     return NextResponse.json(
@@ -17,19 +41,36 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const news = await getNews();
+    const supabase = getSupabaseAdmin();
     
-    // Generate new ID
-    const newId = String(Math.max(0, ...news.map(n => parseInt(n.id) || 0)) + 1);
+    // Generate slug from title
+    const slug = body.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .substring(0, 100);
+
+    // Prepare data for database (remove tags as it's not in DB schema)
+    const { tags, ...dbNews } = body;
     
-    const newNews = {
-      ...body,
-      id: newId,
+    const newsData = {
+      ...dbNews,
+      slug,
+      published: true,
+      published_at: new Date().toISOString(),
     };
-    
-    news.unshift(newNews);
-    await saveNews(news);
-    
+
+    const { data: newNews, error } = await supabase
+      .from('news')
+      .insert([newsData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating news:', error);
+      throw error;
+    }
+
     return NextResponse.json(newNews);
   } catch (error) {
     console.error("Failed to create news:", error);

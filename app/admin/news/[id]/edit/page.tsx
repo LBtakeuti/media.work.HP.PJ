@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { NewsItem } from "@/lib/data";
+import { NewsItem } from "@/lib/supabase-data";
 import dynamic from "next/dynamic";
 import ImageSelector from "@/components/admin/ImageSelector";
 
@@ -12,13 +12,20 @@ const RichTextEditor = dynamic(
   { ssr: false }
 );
 
+interface Tag {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export default function EditNewsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Tag[]>([]);
   const [formData, setFormData] = useState({
     title: "",
-    category: "お知らせ",
+    category: "",
     date: "",
     summary: "",
     content: "",
@@ -28,8 +35,21 @@ export default function EditNewsPage({ params }: { params: { id: string } }) {
   const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
+    loadCategories();
     loadNews();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const response = await fetch("/api/admin/tags/news");
+      if (response.ok) {
+        const data: Tag[] = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+    }
+  };
 
   const loadNews = async () => {
     try {
@@ -152,10 +172,15 @@ export default function EditNewsPage({ params }: { params: { id: string } }) {
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
-              <option value="お知らせ">お知らせ</option>
-              <option value="プレスリリース">プレスリリース</option>
-              <option value="採用">採用</option>
-              <option value="イベント">イベント</option>
+              {categories.length === 0 ? (
+                <option value="">カテゴリがありません</option>
+              ) : (
+                categories.map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
           <div>

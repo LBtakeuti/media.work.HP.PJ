@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -11,12 +11,19 @@ const RichTextEditor = dynamic(
   { ssr: false }
 );
 
+interface Tag {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export default function NewNewsPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Tag[]>([]);
   const [formData, setFormData] = useState({
     title: "",
-    category: "お知らせ",
+    category: "",
     date: new Date().toISOString().split("T")[0],
     summary: "",
     content: "",
@@ -24,6 +31,26 @@ export default function NewNewsPage() {
     tags: [] as string[],
   });
   const [tagInput, setTagInput] = useState("");
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const response = await fetch("/api/admin/tags/news");
+      if (response.ok) {
+        const data: Tag[] = await response.json();
+        setCategories(data);
+        // Set first category as default if available
+        if (data.length > 0 && !formData.category) {
+          setFormData(prev => ({ ...prev, category: data[0].name }));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,10 +139,15 @@ export default function NewNewsPage() {
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
-              <option value="お知らせ">お知らせ</option>
-              <option value="プレスリリース">プレスリリース</option>
-              <option value="採用">採用</option>
-              <option value="イベント">イベント</option>
+              {categories.length === 0 ? (
+                <option value="">カテゴリがありません</option>
+              ) : (
+                categories.map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
           <div>

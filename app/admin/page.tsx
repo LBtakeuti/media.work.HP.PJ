@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { NewsItem, ContactSubmission } from "@/lib/data";
+import { NewsItem, ContactSubmission } from "@/lib/supabase-data";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"news" | "contacts">("news");
