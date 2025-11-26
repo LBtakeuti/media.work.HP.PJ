@@ -38,12 +38,19 @@ export default async function ServiceDetailPage({
 
       {/* Service Content */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Category */}
-        <div className="mb-6">
-          <span className="inline-block px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded">
-            {service.category}
-          </span>
-        </div>
+        {/* Categories */}
+        {service.categories && service.categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {service.categories.map((category, index) => (
+              <span 
+                key={index}
+                className="inline-block px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Title */}
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
@@ -70,19 +77,6 @@ export default async function ServiceDetailPage({
           </div>
         )}
 
-        {/* Tags */}
-        {service.tags && service.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
-            {service.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
 
         {/* Content */}
         <div

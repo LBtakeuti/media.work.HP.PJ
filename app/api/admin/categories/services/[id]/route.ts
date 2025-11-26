@@ -13,7 +13,7 @@ function getSupabaseAdmin() {
   });
 }
 
-// PUT: Update a service tag
+// PUT: Update a service category
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -23,21 +23,25 @@ export async function PUT(
     const { name, color } = body;
 
     if (!name || typeof name !== "string") {
-      return NextResponse.json({ error: "Invalid tag name" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid category name" }, { status: 400 });
     }
 
     const supabase = getSupabaseAdmin();
 
     // Generate slug from name
-    const slug = name
+    let slug = name
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w\-]+/g, '')
       .substring(0, 100);
 
+    if (!slug) {
+      slug = `category-${Date.now()}`;
+    }
+
     const updateData: any = {
       name,
-      slug: slug || `tag-${Date.now()}`,
+      slug,
     };
 
     if (color) {
@@ -45,29 +49,29 @@ export async function PUT(
     }
 
     const { data, error } = await supabase
-      .from('service_tags')
+      .from('service_categories')
       .update(updateData)
       .eq('id', params.id)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating service tag:', error);
+      console.error('Error updating service category:', error);
       throw error;
     }
 
     if (!data) {
-      return NextResponse.json({ error: "Tag not found" }, { status: 404 });
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error updating service tag:", error);
-    return NextResponse.json({ error: "Failed to update service tag" }, { status: 500 });
+    console.error("Error updating service category:", error);
+    return NextResponse.json({ error: "Failed to update service category" }, { status: 500 });
   }
 }
 
-// DELETE: Delete a service tag
+// DELETE: Delete a service category
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -76,21 +80,19 @@ export async function DELETE(
     const supabase = getSupabaseAdmin();
 
     const { error } = await supabase
-      .from('service_tags')
+      .from('service_categories')
       .delete()
       .eq('id', params.id);
 
     if (error) {
-      console.error('Error deleting service tag:', error);
+      console.error('Error deleting service category:', error);
       throw error;
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting service tag:", error);
-    return NextResponse.json({ error: "Failed to delete service tag" }, { status: 500 });
+    console.error("Error deleting service category:", error);
+    return NextResponse.json({ error: "Failed to delete service category" }, { status: 500 });
   }
 }
-
-
 

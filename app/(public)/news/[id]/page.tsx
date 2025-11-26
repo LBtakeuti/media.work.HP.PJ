@@ -40,11 +40,20 @@ export default async function NewsDetailPage({
 
       {/* Article Content */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Category & Date */}
-        <div className="flex items-center gap-4 mb-6">
-          <span className="inline-block px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded">
-            {news.category}
-          </span>
+        {/* Categories & Date */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          {news.categories && news.categories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {news.categories.map((category, index) => (
+                <span 
+                  key={index}
+                  className="inline-block px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          )}
           <time className="text-sm text-gray-600">
             {format(new Date(news.date), "yyyy年MM月dd日", { locale: ja })}
           </time>
@@ -75,19 +84,6 @@ export default async function NewsDetailPage({
           </div>
         )}
 
-        {/* Tags */}
-        {news.tags && news.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
-            {news.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
 
         {/* Content */}
         <div

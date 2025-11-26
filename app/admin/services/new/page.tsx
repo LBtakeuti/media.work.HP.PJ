@@ -11,7 +11,7 @@ const RichTextEditor = dynamic(
   { ssr: false }
 );
 
-interface ServiceTag {
+interface Category {
   id: string;
   name: string;
   slug: string;
@@ -21,36 +21,41 @@ interface ServiceTag {
 export default function NewServicePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serviceTags, setServiceTags] = useState<ServiceTag[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     title: "",
-    category: "サービスカテゴリ",
     description: "",
     content: "",
     summary: "",
     image: "/sevilla-tower-g8a5d080a4_640.jpg",
-    tags: [] as string[],
+    categories: [] as string[],
     image_display_mode: "contain" as "contain" | "cover",
   });
 
   useEffect(() => {
-    loadServiceTags();
+    loadCategories();
   }, []);
 
-  const loadServiceTags = async () => {
+  const loadCategories = async () => {
     try {
-      const response = await fetch("/api/admin/tags/services");
+      const response = await fetch("/api/admin/categories/services");
       if (response.ok) {
-        const tags = await response.json();
-        setServiceTags(tags);
+        const data = await response.json();
+        setAvailableCategories(data);
       }
     } catch (error) {
-      console.error("Failed to load service tags:", error);
+      console.error("Failed to load categories:", error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.categories.length === 0) {
+      alert("カテゴリを1つ以上選択してください");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -75,16 +80,13 @@ export default function NewServicePage() {
     }
   };
 
-  const toggleTag = (tagName: string) => {
-    setFormData((prev) => {
-      const isSelected = prev.tags.includes(tagName);
-      return {
-        ...prev,
-        tags: isSelected
-          ? prev.tags.filter((t) => t !== tagName)
-          : [...prev.tags, tagName],
-      };
-    });
+  const toggleCategory = (categoryName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(categoryName)
+        ? prev.categories.filter(c => c !== categoryName)
+        : [...prev.categories, categoryName]
+    }));
   };
 
   return (
@@ -118,23 +120,46 @@ export default function NewServicePage() {
           />
         </div>
 
-        {/* Category */}
+        {/* Categories (Multiple Selection) */}
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            カテゴリ *
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            カテゴリ（複数選択可） *
           </label>
-          <select
-            id="category"
-            required
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="サービスカテゴリ">サービスカテゴリ</option>
-            <option value="プレスリリース">プレスリリース</option>
-            <option value="コンサルティング">コンサルティング</option>
-            <option value="開発">開発</option>
-          </select>
+          {availableCategories.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              カテゴリがありません。
+              <Link href="/admin/categories/services" className="text-primary-600 hover:underline ml-1">
+                カテゴリを作成
+              </Link>
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {availableCategories.map((category) => {
+                const isSelected = formData.categories.includes(category.name);
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => toggleCategory(category.name)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      isSelected
+                        ? "text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    style={isSelected ? { backgroundColor: category.color } : {}}
+                  >
+                    {category.name}
+                    {isSelected && " ✓"}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {formData.categories.length > 0 && (
+            <p className="mt-2 text-sm text-gray-600">
+              選択中: {formData.categories.join(", ")}
+            </p>
+          )}
         </div>
 
         {/* Image */}
@@ -194,42 +219,6 @@ export default function NewServicePage() {
           </p>
         </div>
 
-        {/* Tags */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            タグ（複数選択可）
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {serviceTags.map((tag) => (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => toggleTag(tag.name)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  formData.tags.includes(tag.name)
-                    ? "bg-primary-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                style={
-                  formData.tags.includes(tag.name)
-                    ? { backgroundColor: tag.color, color: "white" }
-                    : {}
-                }
-              >
-                {tag.name}
-              </button>
-            ))}
-          </div>
-          {serviceTags.length === 0 && (
-            <p className="text-sm text-gray-500 mt-2">
-              タグが登録されていません。
-              <Link href="/admin/tags/services" className="text-primary-600 hover:underline ml-1">
-                タグを作成
-              </Link>
-            </p>
-          )}
-        </div>
-
         {/* Submit Buttons */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
           <Link
@@ -250,4 +239,3 @@ export default function NewServicePage() {
     </div>
   );
 }
-

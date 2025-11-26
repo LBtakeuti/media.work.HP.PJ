@@ -11,27 +11,26 @@ const RichTextEditor = dynamic(
   { ssr: false }
 );
 
-interface Tag {
+interface Category {
   id: string;
   name: string;
-  createdAt: string;
+  slug: string;
+  color: string;
 }
 
 export default function NewNewsPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [categories, setCategories] = useState<Tag[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     title: "",
-    category: "",
     date: new Date().toISOString().split("T")[0],
     summary: "",
     content: "",
     image: "/sevilla-tower-g8a5d080a4_640.jpg",
-    tags: [] as string[],
+    categories: [] as string[],
     image_display_mode: "contain" as "contain" | "cover",
   });
-  const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
     loadCategories();
@@ -39,14 +38,10 @@ export default function NewNewsPage() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetch("/api/admin/tags/news");
+      const response = await fetch("/api/admin/categories/news");
       if (response.ok) {
-        const data: Tag[] = await response.json();
-        setCategories(data);
-        // Set first category as default if available
-        if (data.length > 0 && !formData.category) {
-          setFormData(prev => ({ ...prev, category: data[0].name }));
-        }
+        const data: Category[] = await response.json();
+        setAvailableCategories(data);
       }
     } catch (error) {
       console.error("Failed to load categories:", error);
@@ -55,6 +50,12 @@ export default function NewNewsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.categories.length === 0) {
+      alert("カテゴリを1つ以上選択してください");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -79,21 +80,13 @@ export default function NewNewsPage() {
     }
   };
 
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()],
-      });
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter((t) => t !== tag),
-    });
+  const toggleCategory = (categoryName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(categoryName)
+        ? prev.categories.filter(c => c !== categoryName)
+        : [...prev.categories, categoryName]
+    }));
   };
 
   return (
@@ -127,43 +120,61 @@ export default function NewNewsPage() {
           />
         </div>
 
-        {/* Category and Date */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-              カテゴリ *
-            </label>
-            <select
-              id="category"
-              required
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            >
-              {categories.length === 0 ? (
-                <option value="">カテゴリがありません</option>
-              ) : (
-                categories.map((category) => (
-                  <option key={category.id} value={category.name}>
+        {/* Categories (Multiple Selection) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            カテゴリ（複数選択可） *
+          </label>
+          {availableCategories.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              カテゴリがありません。
+              <Link href="/admin/categories/news" className="text-primary-600 hover:underline ml-1">
+                カテゴリを作成
+              </Link>
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {availableCategories.map((category) => {
+                const isSelected = formData.categories.includes(category.name);
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => toggleCategory(category.name)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      isSelected
+                        ? "text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    style={isSelected ? { backgroundColor: category.color } : {}}
+                  >
                     {category.name}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-              公開日 *
-            </label>
-            <input
-              type="date"
-              id="date"
-              required
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
+                    {isSelected && " ✓"}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {formData.categories.length > 0 && (
+            <p className="mt-2 text-sm text-gray-600">
+              選択中: {formData.categories.join(", ")}
+            </p>
+          )}
+        </div>
+
+        {/* Date */}
+        <div>
+          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+            公開日 *
+          </label>
+          <input
+            type="date"
+            id="date"
+            required
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
         </div>
 
         {/* Image */}
@@ -224,49 +235,6 @@ export default function NewNewsPage() {
           <p className="mt-1 text-xs text-gray-500">
             リッチテキストエディタで本文を作成できます。
           </p>
-        </div>
-
-        {/* Tags */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            タグ
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="タグを入力してEnter"
-            />
-            <button
-              type="button"
-              onClick={addTag}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              追加
-            </button>
-          </div>
-          {formData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="hover:text-primary-900"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Submit Buttons */}

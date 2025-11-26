@@ -1,19 +1,22 @@
 import { supabase } from './supabase';
 
+// ============================================
+// インターフェース定義
+// ============================================
+
 export interface NewsItem {
   id: string;
   title: string;
   content: string;
   date: string;
-  category: string;
   image?: string;
   excerpt?: string;
   summary?: string;
   slug?: string;
   published?: boolean;
   published_at?: string;
-  tags?: string[];
   image_display_mode?: 'contain' | 'cover';
+  categories?: string[]; // カテゴリ名の配列
 }
 
 export interface ContactSubmission {
@@ -41,11 +44,11 @@ export interface ServiceItem {
   sort_order?: number;
   published?: boolean;
   published_at?: string;
-  tags?: string[];
   image_display_mode?: 'contain' | 'cover';
+  categories?: string[]; // カテゴリ名の配列
 }
 
-export interface Tag {
+export interface Category {
   id: string;
   name: string;
   slug?: string;
@@ -55,7 +58,132 @@ export interface Tag {
   updated_at?: string;
 }
 
-// News functions
+// ============================================
+// ニュースカテゴリ関連
+// ============================================
+
+export async function getNewsCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from('news_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching news categories:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function createNewsCategory(category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<Category> {
+  const { data, error } = await supabase
+    .from('news_categories')
+    .insert([category])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating news category:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateNewsCategory(id: string, category: Partial<Category>): Promise<Category> {
+  const { data, error } = await supabase
+    .from('news_categories')
+    .update(category)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating news category:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteNewsCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('news_categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting news category:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// サービスカテゴリ関連
+// ============================================
+
+export async function getServiceCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from('service_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching service categories:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function createServiceCategory(category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<Category> {
+  const { data, error } = await supabase
+    .from('service_categories')
+    .insert([category])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating service category:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateServiceCategory(id: string, category: Partial<Category>): Promise<Category> {
+  const { data, error } = await supabase
+    .from('service_categories')
+    .update(category)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating service category:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteServiceCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('service_categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting service category:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// ニュース関連
+// ============================================
+
 export async function getNews(): Promise<NewsItem[]> {
   const { data, error } = await supabase
     .from('news')
@@ -64,6 +192,69 @@ export async function getNews(): Promise<NewsItem[]> {
 
   if (error) {
     console.error('Error fetching news:', error);
+    throw error;
+  }
+
+  // カテゴリ情報を取得して追加
+  const newsWithCategories = await Promise.all(
+    (data || []).map(async (news) => {
+      const { data: relations } = await supabase
+        .from('news_category_relations')
+        .select('category_id')
+        .eq('news_id', news.id);
+
+      if (relations && relations.length > 0) {
+        const categoryIds = relations.map(r => r.category_id);
+        const { data: categories } = await supabase
+          .from('news_categories')
+          .select('name')
+          .in('id', categoryIds);
+        
+        return {
+          ...news,
+          categories: categories?.map(c => c.name) || []
+        };
+      }
+      return { ...news, categories: [] };
+    })
+  );
+
+  return newsWithCategories;
+}
+
+export async function getNewsByCategory(categorySlug: string): Promise<NewsItem[]> {
+  // カテゴリIDを取得
+  const { data: category } = await supabase
+    .from('news_categories')
+    .select('id')
+    .eq('slug', categorySlug)
+    .single();
+
+  if (!category) {
+    return [];
+  }
+
+  // そのカテゴリに紐づくニュースIDを取得
+  const { data: relations } = await supabase
+    .from('news_category_relations')
+    .select('news_id')
+    .eq('category_id', category.id);
+
+  if (!relations || relations.length === 0) {
+    return [];
+  }
+
+  const newsIds = relations.map(r => r.news_id);
+  
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .in('id', newsIds)
+    .eq('published', true)
+    .order('date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching news by category:', error);
     throw error;
   }
 
@@ -82,7 +273,26 @@ export async function getNewsById(id: string): Promise<NewsItem | null> {
     return null;
   }
 
-  return data;
+  // カテゴリ情報を取得
+  const { data: relations } = await supabase
+    .from('news_category_relations')
+    .select('category_id')
+    .eq('news_id', id);
+
+  if (relations && relations.length > 0) {
+    const categoryIds = relations.map(r => r.category_id);
+    const { data: categories } = await supabase
+      .from('news_categories')
+      .select('name')
+      .in('id', categoryIds);
+    
+    return {
+      ...data,
+      categories: categories?.map(c => c.name) || []
+    };
+  }
+
+  return { ...data, categories: [] };
 }
 
 export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> {
@@ -93,13 +303,12 @@ export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> 
     .replace(/[^\w\-]+/g, '')
     .substring(0, 100);
 
-  // If slug is empty (e.g., Japanese title), use timestamp-based slug
   if (!slug || slug.length === 0) {
     slug = `news-${Date.now()}`;
   }
 
-  // Prepare data for database (remove tags as it's not in DB schema)
-  const { tags, ...dbNews } = news;
+  // Prepare data for database (remove categories as it's managed via relations)
+  const { categories, ...dbNews } = news;
   
   const newsData = {
     ...dbNews,
@@ -119,35 +328,33 @@ export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> 
     throw error;
   }
 
-  // タグの紐付けを作成（categoryをタグとして使用）
-  if (newNews && news.category) {
-    // カテゴリに対応するタグを検索
-    const { data: tagData } = await supabase
-      .from('news_tags')
-      .select('id')
-      .eq('name', news.category)
-      .single();
+  // カテゴリの紐付けを作成
+  if (newNews && categories && categories.length > 0) {
+    for (const categoryName of categories) {
+      const { data: categoryData } = await supabase
+        .from('news_categories')
+        .select('id')
+        .eq('name', categoryName)
+        .single();
 
-    if (tagData) {
-      // news_tag_relationsに紐付けを作成
-      await supabase
-        .from('news_tag_relations')
-        .insert({
-          news_id: newNews.id,
-          tag_id: tagData.id
-        });
+      if (categoryData) {
+        await supabase
+          .from('news_category_relations')
+          .insert({
+            news_id: newNews.id,
+            category_id: categoryData.id
+          });
+      }
     }
   }
 
-  return newNews;
+  return { ...newNews, categories: categories || [] };
 }
 
 export async function updateNews(id: string, news: Partial<NewsItem>): Promise<NewsItem> {
-  // Prepare data for database (remove tags as it's not in DB schema)
-  const { tags, ...dbNews } = news;
+  const { categories, ...dbNews } = news;
   
-  // Generate slug from title if title is being updated
-  let updateData = dbNews;
+  let updateData: any = { ...dbNews };
   if (dbNews.title) {
     let slug = dbNews.title
       .toLowerCase()
@@ -155,15 +362,11 @@ export async function updateNews(id: string, news: Partial<NewsItem>): Promise<N
       .replace(/[^\w\-]+/g, '')
       .substring(0, 100);
     
-    // If slug is empty (e.g., Japanese title), use timestamp-based slug
     if (!slug || slug.length === 0) {
       slug = `news-${Date.now()}`;
     }
     
-    updateData = {
-      ...dbNews,
-      slug,
-    };
+    updateData.slug = slug;
   }
 
   const { data: updatedNews, error } = await supabase
@@ -178,36 +381,40 @@ export async function updateNews(id: string, news: Partial<NewsItem>): Promise<N
     throw error;
   }
 
-  // カテゴリが変更された場合、タグの紐付けを更新
-  if (updatedNews && news.category) {
+  // カテゴリが提供された場合、紐付けを更新
+  if (categories !== undefined) {
     // 既存の紐付けを削除
     await supabase
-      .from('news_tag_relations')
+      .from('news_category_relations')
       .delete()
       .eq('news_id', id);
 
-    // カテゴリに対応するタグを検索
-    const { data: tagData } = await supabase
-      .from('news_tags')
-      .select('id')
-      .eq('name', news.category)
-      .single();
+    // 新しい紐付けを作成
+    if (categories && categories.length > 0) {
+      for (const categoryName of categories) {
+        const { data: categoryData } = await supabase
+          .from('news_categories')
+          .select('id')
+          .eq('name', categoryName)
+          .single();
 
-    if (tagData) {
-      // 新しい紐付けを作成
-      await supabase
-        .from('news_tag_relations')
-        .insert({
-          news_id: id,
-          tag_id: tagData.id
-        });
+        if (categoryData) {
+          await supabase
+            .from('news_category_relations')
+            .insert({
+              news_id: id,
+              category_id: categoryData.id
+            });
+        }
+      }
     }
   }
 
-  return updatedNews;
+  return { ...updatedNews, categories: categories || [] };
 }
 
 export async function deleteNews(id: string): Promise<void> {
+  // カテゴリ紐付けは CASCADE で自動削除される
   const { error } = await supabase
     .from('news')
     .delete()
@@ -219,67 +426,10 @@ export async function deleteNews(id: string): Promise<void> {
   }
 }
 
-// News Tags functions
-export async function getNewsTags(): Promise<Tag[]> {
-  const { data, error } = await supabase
-    .from('news_tags')
-    .select('*')
-    .order('sort_order', { ascending: true });
+// ============================================
+// サービス関連
+// ============================================
 
-  if (error) {
-    console.error('Error fetching news tags:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-export async function createNewsTag(tag: Omit<Tag, 'id' | 'created_at' | 'updated_at'>): Promise<Tag> {
-  const { data, error } = await supabase
-    .from('news_tags')
-    .insert([tag])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating news tag:', error);
-    throw error;
-  }
-
-  return data;
-}
-
-// Service Tags functions
-export async function getServiceTags(): Promise<Tag[]> {
-  const { data, error } = await supabase
-    .from('service_tags')
-    .select('*')
-    .order('sort_order', { ascending: true });
-
-  if (error) {
-    console.error('Error fetching service tags:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-export async function createServiceTag(tag: Omit<Tag, 'id' | 'created_at' | 'updated_at'>): Promise<Tag> {
-  const { data, error } = await supabase
-    .from('service_tags')
-    .insert([tag])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating service tag:', error);
-    throw error;
-  }
-
-  return data;
-}
-
-// Services functions
 export async function getServices(): Promise<ServiceItem[]> {
   const { data, error } = await supabase
     .from('services')
@@ -288,6 +438,69 @@ export async function getServices(): Promise<ServiceItem[]> {
 
   if (error) {
     console.error('Error fetching services:', error);
+    throw error;
+  }
+
+  // カテゴリ情報を取得して追加
+  const servicesWithCategories = await Promise.all(
+    (data || []).map(async (service) => {
+      const { data: relations } = await supabase
+        .from('service_category_relations')
+        .select('category_id')
+        .eq('service_id', service.id);
+
+      if (relations && relations.length > 0) {
+        const categoryIds = relations.map(r => r.category_id);
+        const { data: categories } = await supabase
+          .from('service_categories')
+          .select('name')
+          .in('id', categoryIds);
+        
+        return {
+          ...service,
+          categories: categories?.map(c => c.name) || []
+        };
+      }
+      return { ...service, categories: [] };
+    })
+  );
+
+  return servicesWithCategories;
+}
+
+export async function getServicesByCategory(categorySlug: string): Promise<ServiceItem[]> {
+  // カテゴリIDを取得
+  const { data: category } = await supabase
+    .from('service_categories')
+    .select('id')
+    .eq('slug', categorySlug)
+    .single();
+
+  if (!category) {
+    return [];
+  }
+
+  // そのカテゴリに紐づくサービスIDを取得
+  const { data: relations } = await supabase
+    .from('service_category_relations')
+    .select('service_id')
+    .eq('category_id', category.id);
+
+  if (!relations || relations.length === 0) {
+    return [];
+  }
+
+  const serviceIds = relations.map(r => r.service_id);
+  
+  const { data, error } = await supabase
+    .from('services')
+    .select('*')
+    .in('id', serviceIds)
+    .eq('published', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching services by category:', error);
     throw error;
   }
 
@@ -306,16 +519,53 @@ export async function getServiceById(id: string): Promise<ServiceItem | null> {
     return null;
   }
 
-  return data;
+  // カテゴリ情報を取得
+  const { data: relations } = await supabase
+    .from('service_category_relations')
+    .select('category_id')
+    .eq('service_id', id);
+
+  if (relations && relations.length > 0) {
+    const categoryIds = relations.map(r => r.category_id);
+    const { data: categories } = await supabase
+      .from('service_categories')
+      .select('name')
+      .in('id', categoryIds);
+    
+    return {
+      ...data,
+      categories: categories?.map(c => c.name) || []
+    };
+  }
+
+  return { ...data, categories: [] };
 }
 
 export async function createService(service: Omit<ServiceItem, 'id'>): Promise<ServiceItem> {
-  // Prepare data for database (remove tags as it's not in DB schema)
-  const { tags, ...dbService } = service;
+  // Generate slug from title
+  let slug = service.title
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .substring(0, 100);
+
+  if (!slug || slug.length === 0) {
+    slug = `service-${Date.now()}`;
+  }
+
+  // Prepare data for database (remove categories as it's managed via relations)
+  const { categories, ...dbService } = service;
+
+  const serviceData = {
+    ...dbService,
+    slug,
+    published: true,
+    published_at: new Date().toISOString(),
+  };
 
   const { data: newService, error } = await supabase
     .from('services')
-    .insert([dbService])
+    .insert([serviceData])
     .select()
     .single();
 
@@ -324,34 +574,31 @@ export async function createService(service: Omit<ServiceItem, 'id'>): Promise<S
     throw error;
   }
 
-  // タグの紐付けを作成（tagsがある場合）
-  if (newService && tags && tags.length > 0) {
-    for (const tagName of tags) {
-      // タグを検索
-      const { data: tagData } = await supabase
-        .from('service_tags')
+  // カテゴリの紐付けを作成
+  if (newService && categories && categories.length > 0) {
+    for (const categoryName of categories) {
+      const { data: categoryData } = await supabase
+        .from('service_categories')
         .select('id')
-        .eq('name', tagName)
+        .eq('name', categoryName)
         .single();
 
-      if (tagData) {
-        // service_tag_relationsに紐付けを作成
+      if (categoryData) {
         await supabase
-          .from('service_tag_relations')
+          .from('service_category_relations')
           .insert({
             service_id: newService.id,
-            tag_id: tagData.id
+            category_id: categoryData.id
           });
       }
     }
   }
 
-  return newService;
+  return { ...newService, categories: categories || [] };
 }
 
 export async function updateService(id: string, service: Partial<ServiceItem>): Promise<ServiceItem> {
-  // Prepare data for database (remove tags as it's not in DB schema)
-  const { tags, ...dbService } = service;
+  const { categories, ...dbService } = service;
 
   const { data: updatedService, error } = await supabase
     .from('services')
@@ -365,37 +612,40 @@ export async function updateService(id: string, service: Partial<ServiceItem>): 
     throw error;
   }
 
-  // タグが提供された場合、紐付けを更新
-  if (updatedService && tags && tags.length > 0) {
+  // カテゴリが提供された場合、紐付けを更新
+  if (categories !== undefined) {
     // 既存の紐付けを削除
     await supabase
-      .from('service_tag_relations')
+      .from('service_category_relations')
       .delete()
       .eq('service_id', id);
 
     // 新しい紐付けを作成
-    for (const tagName of tags) {
-      const { data: tagData } = await supabase
-        .from('service_tags')
-        .select('id')
-        .eq('name', tagName)
-        .single();
+    if (categories && categories.length > 0) {
+      for (const categoryName of categories) {
+        const { data: categoryData } = await supabase
+          .from('service_categories')
+          .select('id')
+          .eq('name', categoryName)
+          .single();
 
-      if (tagData) {
-        await supabase
-          .from('service_tag_relations')
-          .insert({
-            service_id: id,
-            tag_id: tagData.id
-          });
+        if (categoryData) {
+          await supabase
+            .from('service_category_relations')
+            .insert({
+              service_id: id,
+              category_id: categoryData.id
+            });
+        }
       }
     }
   }
 
-  return updatedService;
+  return { ...updatedService, categories: categories || [] };
 }
 
 export async function deleteService(id: string): Promise<void> {
+  // カテゴリ紐付けは CASCADE で自動削除される
   const { error } = await supabase
     .from('services')
     .delete()
@@ -407,7 +657,10 @@ export async function deleteService(id: string): Promise<void> {
   }
 }
 
-// Contacts functions
+// ============================================
+// お問い合わせ関連
+// ============================================
+
 export async function getContacts(): Promise<ContactSubmission[]> {
   const { data, error } = await supabase
     .from('contacts')
@@ -453,3 +706,14 @@ export async function updateContactStatus(id: string, status: string): Promise<C
   return data;
 }
 
+export async function deleteContact(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('contacts')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting contact:', error);
+    throw error;
+  }
+}

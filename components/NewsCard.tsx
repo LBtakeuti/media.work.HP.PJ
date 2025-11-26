@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { NewsItem } from "@/lib/data";
+import { NewsItem } from "@/lib/supabase-data";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
@@ -31,9 +31,15 @@ export default function NewsCard({ item }: NewsCardProps) {
             locale: ja,
           })}
         </div>
-        <div className="text-xs text-gray-600 mb-3">
-          {item.category}
-        </div>
+        {item.categories && item.categories.length > 0 && (
+          <div className="text-xs text-gray-600 mb-3 flex flex-wrap gap-1">
+            {item.categories.map((category, index) => (
+              <span key={index} className="bg-gray-100 px-2 py-0.5 rounded">
+                {category}
+              </span>
+            ))}
+          </div>
+        )}
         <h3 className="text-xl font-bold text-gray-900 leading-tight mb-4 line-clamp-3 group-hover:text-primary-600 transition-colors">
           {item.title}
         </h3>
@@ -46,4 +52,3 @@ export default function NewsCard({ item }: NewsCardProps) {
     </Link>
   );
 }
-

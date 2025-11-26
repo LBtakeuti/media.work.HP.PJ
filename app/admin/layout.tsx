@@ -94,8 +94,8 @@ export default function AdminLayout({
     { href: "/admin/news", label: "ニュース管理" },
     { href: "/admin/services", label: "サービス管理" },
     { href: "/admin/contacts", label: "お問い合わせ" },
-    { href: "/admin/tags/news", label: "ニュースタグマスタ" },
-    { href: "/admin/tags/services", label: "サービスタグマスタ" },
+    { href: "/admin/categories/news", label: "ニュースカテゴリ" },
+    { href: "/admin/categories/services", label: "サービスカテゴリ" },
   ];
 
   return (

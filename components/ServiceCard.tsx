@@ -3,9 +3,9 @@ import Link from "next/link";
 
 interface ServiceCardProps {
   title: string;
-  description: string;
+  description?: string;
   date?: string;
-  category?: string;
+  categories?: string[];
   imageSrc?: string;
   imageAlt?: string;
   href?: string;
@@ -16,7 +16,7 @@ export default function ServiceCard({
   title,
   description,
   date,
-  category,
+  categories,
   imageSrc = "/sevilla-tower-g8a5d080a4_640.jpg",
   imageAlt,
   href,
@@ -38,17 +38,23 @@ export default function ServiceCard({
       
       {/* Content Section */}
       <div className="p-5 bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200">
-        {(date || category) && (
-          <div className="text-xs text-gray-500 mb-3">
-            {date && category ? `${date} | ${category}` : date || category}
+        {(date || (categories && categories.length > 0)) && (
+          <div className="text-xs text-gray-500 mb-3 flex flex-wrap items-center gap-2">
+            {date && <span>{date}</span>}
+            {date && categories && categories.length > 0 && <span>|</span>}
+            {categories && categories.length > 0 && (
+              <span>{categories.join(", ")}</span>
+            )}
           </div>
         )}
         <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
           {title}
         </h3>
-        <p className="text-sm text-gray-700 leading-relaxed mb-4">
-          {description}
-        </p>
+        {description && (
+          <p className="text-sm text-gray-700 leading-relaxed mb-4">
+            {description}
+          </p>
+        )}
         <div className="flex justify-end">
           <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -74,4 +80,3 @@ export default function ServiceCard({
     </div>
   );
 }
-

@@ -106,34 +106,13 @@ export default async function Home() {
                 key={service.id}
                 title={service.title}
                 description={service.description}
-                category={service.category}
+                categories={service.categories}
                 imageSrc={service.image}
                 imageAlt={service.title}
                 href={`/services/${service.id}`}
                 imageDisplayMode={service.image_display_mode}
               />
             ))}
-            <ServiceCard
-              title="サービスタイトル4"
-              description="サービスの説明文がここに入ります。詳細な説明を記載します。"
-              date="2025年11月17日"
-              category="プレスリリース"
-              imageAlt="サービス4"
-            />
-            <ServiceCard
-              title="サービスタイトル5"
-              description="サービスの説明文がここに入ります。詳細な説明を記載します。"
-              date="2025年11月17日"
-              category="プレスリリース"
-              imageAlt="サービス5"
-            />
-            <ServiceCard
-              title="サービスタイトル6"
-              description="サービスの説明文がここに入ります。詳細な説明を記載します。"
-              date="2025年11月17日"
-              category="プレスリリース"
-              imageAlt="サービス6"
-            />
           </div>
         </div>
       </section>

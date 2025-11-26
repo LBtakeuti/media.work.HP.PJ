@@ -13,85 +13,87 @@ function getSupabaseAdmin() {
   });
 }
 
-// GET: Fetch all service tags
+// GET: Fetch all service categories
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     
-    const { data: tags, error } = await supabase
-      .from('service_tags')
+    const { data: categories, error } = await supabase
+      .from('service_categories')
       .select('*')
       .order('sort_order', { ascending: true });
 
     if (error) {
-      console.error('Error fetching service tags:', error);
+      console.error('Error fetching service categories:', error);
       throw error;
     }
 
-    return NextResponse.json(tags || []);
+    return NextResponse.json(categories || []);
   } catch (error) {
-    console.error("Error reading service tags:", error);
-    return NextResponse.json({ error: "Failed to load service tags" }, { status: 500 });
+    console.error("Error reading service categories:", error);
+    return NextResponse.json({ error: "Failed to load service categories" }, { status: 500 });
   }
 }
 
-// POST: Create a new service tag
+// POST: Create a new service category
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, color } = body;
 
     if (!name || typeof name !== "string") {
-      return NextResponse.json({ error: "Invalid tag name" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid category name" }, { status: 400 });
     }
 
     const supabase = getSupabaseAdmin();
 
     // Generate slug from name
-    const slug = name
+    let slug = name
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w\-]+/g, '')
       .substring(0, 100);
 
+    if (!slug) {
+      slug = `category-${Date.now()}`;
+    }
+
     // Get the highest sort_order
-    const { data: existingTags } = await supabase
-      .from('service_tags')
+    const { data: existingCategories } = await supabase
+      .from('service_categories')
       .select('sort_order')
       .order('sort_order', { ascending: false })
       .limit(1);
 
-    const nextSortOrder = existingTags && existingTags.length > 0 
-      ? (existingTags[0].sort_order || 0) + 1 
+    const nextSortOrder = existingCategories && existingCategories.length > 0 
+      ? (existingCategories[0].sort_order || 0) + 1 
       : 1;
 
-    const newTag = {
+    const newCategory = {
       name,
-      slug: slug || `tag-${Date.now()}`,
-      color: color || '#6B7280',
+      slug,
+      color: color || '#10B981',
       sort_order: nextSortOrder,
     };
 
     const { data, error } = await supabase
-      .from('service_tags')
-      .insert([newTag])
+      .from('service_categories')
+      .insert([newCategory])
       .select()
       .single();
 
     if (error) {
-      console.error('Error creating service tag:', error);
+      console.error('Error creating service category:', error);
       if (error.code === '23505') {
-        return NextResponse.json({ error: "Tag already exists" }, { status: 400 });
+        return NextResponse.json({ error: "Category already exists" }, { status: 400 });
       }
       throw error;
     }
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Error creating service tag:", error);
-    return NextResponse.json({ error: "Failed to create service tag" }, { status: 500 });
+    console.error("Error creating service category:", error);
+    return NextResponse.json({ error: "Failed to create service category" }, { status: 500 });
   }
 }
-
-
 
