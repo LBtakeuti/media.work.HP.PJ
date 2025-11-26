@@ -19,6 +19,7 @@
     "@tiptap/extension-underline": "^2.1.13",
     "@tiptap/react": "^2.1.13",
     "@tiptap/starter-kit": "^2.1.13",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.0.0",
