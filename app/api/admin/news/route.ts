@@ -46,8 +46,8 @@ export async function GET() {
       .select('news_id, category_id')
       .in('news_id', newsIds);
 
-    // カテゴリIDを一括取得
-    const categoryIds = [...new Set((relations || []).map(r => r.category_id))];
+    // カテゴリIDを一括取得（重複を除去）
+    const categoryIds = Array.from(new Set((relations || []).map(r => r.category_id)));
     let categoriesMap: Record<string, string> = {};
     
     if (categoryIds.length > 0) {
