@@ -74,23 +74,10 @@ export async function PUT(
     const body = await request.json();
     const supabase = getSupabase();
     
-    // id, created_at, categoriesは更新対象から除外
-    const { categories, id, created_at, ...dbNews } = body;
-    let updateData: any = { ...dbNews };
-    
-    if (dbNews.title) {
-      let slug = dbNews.title
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .substring(0, 100);
-      
-      if (!slug || slug.length === 0) {
-        slug = `news-${Date.now()}`;
-      }
-      
-      updateData.slug = slug;
-    }
+    // id, created_at, updated_at, slug, categoriesは更新対象から除外
+    // slugは作成時のみ生成し、更新時は変更しない
+    const { categories, id, created_at, updated_at, slug, ...dbNews } = body;
+    const updateData: any = { ...dbNews };
     
     const { data: updatedNews, error } = await supabase
       .from('news')

@@ -56,25 +56,10 @@ export async function PUT(
     
     const supabase = getSupabaseAdmin();
     
-    // id, created_at, updated_at, categoriesは更新対象から除外
-    const { categories, id, created_at, updated_at, ...dbService } = body;
-    let updateData: any = { ...dbService };
-    
-    console.log("Update data keys:", Object.keys(updateData));
-    
-    if (dbService.title) {
-      let slug = dbService.title
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .substring(0, 100);
-      
-      if (!slug || slug.length === 0) {
-        slug = `service-${Date.now()}`;
-      }
-      
-      updateData.slug = slug;
-    }
+    // id, created_at, updated_at, slug, categoriesは更新対象から除外
+    // slugは作成時のみ生成し、更新時は変更しない
+    const { categories, id, created_at, updated_at, slug, ...dbService } = body;
+    const updateData: any = { ...dbService };
     
     const { data: updatedService, error } = await supabase
       .from('services')
