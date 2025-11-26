@@ -15,7 +15,6 @@ interface ContactForm {
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "error">("idle");
-  const [isDemoMode, setIsDemoMode] = useState(false);
   const router = useRouter();
   
   const {
@@ -30,14 +29,6 @@ export default function ContactPage() {
     setSubmitStatus("idle");
 
     try {
-      // デモモードの場合はAPIを呼び出さずにサンクスページに遷移
-      if (isDemoMode) {
-        setTimeout(() => {
-          router.push("/contact/thanks");
-        }, 500); // 送信中の演出のため少し待つ
-        return;
-      }
-
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -92,21 +83,6 @@ export default function ContactPage() {
       {/* Contact Form */}
       <section className="py-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Demo Mode Toggle */}
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isDemoMode}
-                onChange={(e) => setIsDemoMode(e.target.checked)}
-                className="mr-2 w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-              <span className="text-sm text-gray-700">
-                デモモード（実際に送信せずにサンクスページに遷移）
-              </span>
-            </label>
-          </div>
-
           <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
             {submitStatus === "error" && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">

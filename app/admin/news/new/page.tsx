@@ -27,7 +27,7 @@ export default function NewNewsPage() {
     date: new Date().toISOString().split("T")[0],
     summary: "",
     content: "",
-    image: "/logo1.png",
+    image: "",
     categories: [] as string[],
     image_display_mode: "contain" as "contain" | "cover",
   });

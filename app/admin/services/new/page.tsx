@@ -27,7 +27,7 @@ export default function NewServicePage() {
     description: "",
     content: "",
     summary: "",
-    image: "/logo1.png",
+    image: "",
     categories: [] as string[],
     image_display_mode: "contain" as "contain" | "cover",
   });
@@ -214,9 +214,6 @@ export default function NewServicePage() {
             content={formData.content}
             onChange={(content) => setFormData({ ...formData, content })}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            ツールバーを使用してテキストを装飾できます。
-          </p>
         </div>
 
         {/* Submit Buttons */}

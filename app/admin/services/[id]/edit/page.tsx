@@ -251,9 +251,6 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
             content={formData.content}
             onChange={(content) => setFormData({ ...formData, content })}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            ツールバーを使用してテキストを装飾できます。
-          </p>
         </div>
 
         {/* Submit Buttons */}
