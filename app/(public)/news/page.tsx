@@ -4,6 +4,9 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+// キャッシュを無効化し、毎回最新データを取得
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "ニュース | 株式会社メディア・ワーク",
   description: "株式会社メディア・ワークの最新ニュース、お知らせをご紹介します。",

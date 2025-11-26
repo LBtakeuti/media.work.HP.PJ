@@ -8,6 +8,9 @@ import { cn } from "@/lib/utils";
 import AnimatedTitle from "@/components/AnimatedTitle";
 import type { Metadata } from "next";
 
+// キャッシュを無効化し、毎回最新データを取得
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "株式会社メディア・ワーク",
   description: "1975年創業、東京の印刷製版会社から進化したメディア制作のプロ集団。組版・グラフィックデザインからAI動画撮影サービスSAVREQ、Web制作まで、企画から運営までワンストップでサポート。伝統と革新を融合し、心に残る瞬間を未来へ届けます。",

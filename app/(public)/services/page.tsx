@@ -4,6 +4,9 @@ import ServiceCard from "@/components/ServiceCard";
 import { getServices, getServiceCategories } from "@/lib/supabase-data";
 import type { Metadata } from "next";
 
+// キャッシュを無効化し、毎回最新データを取得
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "サービス | 株式会社メディア・ワーク",
   description: "株式会社メディア・ワークが提供するサービスをご紹介します。",

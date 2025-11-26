@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
+// キャッシュを無効化し、毎回最新データを取得
+export const dynamic = 'force-dynamic';
+
 export default async function NewsDetailPage({
   params,
 }: {

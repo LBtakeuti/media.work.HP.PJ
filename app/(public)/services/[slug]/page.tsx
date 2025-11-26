@@ -3,6 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+// キャッシュを無効化し、毎回最新データを取得
+export const dynamic = 'force-dynamic';
+
 export default async function ServiceDetailPage({
   params,
 }: {
