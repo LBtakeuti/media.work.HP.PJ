@@ -62,7 +62,8 @@ export default function RichTextEditor({
   const handleLinkClick = useCallback(() => {
     if (!editor) return;
     const previousUrl = editor.getAttributes("link").href;
-    const selectedText = editor.state.selection.content().content.textContent || "";
+    const fragment = editor.state.selection.content().content;
+    const selectedText = (fragment as any).textContent || "";
     setLinkUrl(previousUrl || "");
     setLinkText(selectedText || "");
     setShowLinkModal(true);
