@@ -1,32 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { createClient } from '@supabase/supabase-js';
 
-const DATA_FILE = path.join(process.cwd(), "data", "service-tags.json");
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-interface Tag {
-  id: string;
-  name: string;
-  createdAt: string;
-}
-
-// Ensure data directory and file exist
-async function ensureDataFile() {
-  try {
-    await fs.access(DATA_FILE);
-  } catch {
-    await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-    await fs.writeFile(DATA_FILE, JSON.stringify([]));
-  }
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }
 
 // GET: Fetch all service tags
 export async function GET() {
   try {
-    await ensureDataFile();
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    const tags: Tag[] = JSON.parse(data);
-    return NextResponse.json(tags);
+    const supabase = getSupabaseAdmin();
+    
+    const { data: tags, error } = await supabase
+      .from('service_tags')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching service tags:', error);
+      throw error;
+    }
+
+    return NextResponse.json(tags || []);
   } catch (error) {
     console.error("Error reading service tags:", error);
     return NextResponse.json({ error: "Failed to load service tags" }, { status: 500 });
@@ -37,31 +39,54 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name } = body;
+    const { name, color } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Invalid tag name" }, { status: 400 });
     }
 
-    await ensureDataFile();
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    const tags: Tag[] = JSON.parse(data);
+    const supabase = getSupabaseAdmin();
 
-    // Check for duplicates
-    if (tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase())) {
-      return NextResponse.json({ error: "Tag already exists" }, { status: 400 });
-    }
+    // Generate slug from name
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .substring(0, 100);
 
-    const newTag: Tag = {
-      id: String(Date.now()),
+    // Get the highest sort_order
+    const { data: existingTags } = await supabase
+      .from('service_tags')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1);
+
+    const nextSortOrder = existingTags && existingTags.length > 0 
+      ? (existingTags[0].sort_order || 0) + 1 
+      : 1;
+
+    const newTag = {
       name,
-      createdAt: new Date().toISOString(),
+      slug: slug || `tag-${Date.now()}`,
+      color: color || '#6B7280',
+      sort_order: nextSortOrder,
     };
 
-    tags.push(newTag);
-    await fs.writeFile(DATA_FILE, JSON.stringify(tags, null, 2));
+    const { data, error } = await supabase
+      .from('service_tags')
+      .insert([newTag])
+      .select()
+      .single();
 
-    return NextResponse.json(newTag, { status: 201 });
+    if (error) {
+      console.error('Error creating service tag:', error);
+      if (error.code === '23505') {
+        return NextResponse.json({ error: "Tag already exists" }, { status: 400 });
+      }
+      throw error;
+    }
+
+    return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Error creating service tag:", error);
     return NextResponse.json({ error: "Failed to create service tag" }, { status: 500 });

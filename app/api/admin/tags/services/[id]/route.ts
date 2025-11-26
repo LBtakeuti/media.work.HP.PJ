@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { createClient } from '@supabase/supabase-js';
 
-const DATA_FILE = path.join(process.cwd(), "data", "service-tags.json");
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-interface Tag {
-  id: string;
-  name: string;
-  createdAt: string;
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }
 
 // PUT: Update a service tag
@@ -17,34 +20,47 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { name } = body;
+    const { name, color } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Invalid tag name" }, { status: 400 });
     }
 
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    const tags: Tag[] = JSON.parse(data);
+    const supabase = getSupabaseAdmin();
 
-    const tagIndex = tags.findIndex((tag) => tag.id === params.id);
-    if (tagIndex === -1) {
+    // Generate slug from name
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .substring(0, 100);
+
+    const updateData: any = {
+      name,
+      slug: slug || `tag-${Date.now()}`,
+    };
+
+    if (color) {
+      updateData.color = color;
+    }
+
+    const { data, error } = await supabase
+      .from('service_tags')
+      .update(updateData)
+      .eq('id', params.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating service tag:', error);
+      throw error;
+    }
+
+    if (!data) {
       return NextResponse.json({ error: "Tag not found" }, { status: 404 });
     }
 
-    // Check for duplicates (excluding current tag)
-    if (
-      tags.some(
-        (tag, index) =>
-          index !== tagIndex && tag.name.toLowerCase() === name.toLowerCase()
-      )
-    ) {
-      return NextResponse.json({ error: "Tag name already exists" }, { status: 400 });
-    }
-
-    tags[tagIndex].name = name;
-    await fs.writeFile(DATA_FILE, JSON.stringify(tags, null, 2));
-
-    return NextResponse.json(tags[tagIndex]);
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Error updating service tag:", error);
     return NextResponse.json({ error: "Failed to update service tag" }, { status: 500 });
@@ -57,16 +73,17 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    const tags: Tag[] = JSON.parse(data);
+    const supabase = getSupabaseAdmin();
 
-    const filteredTags = tags.filter((tag) => tag.id !== params.id);
+    const { error } = await supabase
+      .from('service_tags')
+      .delete()
+      .eq('id', params.id);
 
-    if (filteredTags.length === tags.length) {
-      return NextResponse.json({ error: "Tag not found" }, { status: 404 });
+    if (error) {
+      console.error('Error deleting service tag:', error);
+      throw error;
     }
-
-    await fs.writeFile(DATA_FILE, JSON.stringify(filteredTags, null, 2));
 
     return NextResponse.json({ success: true });
   } catch (error) {

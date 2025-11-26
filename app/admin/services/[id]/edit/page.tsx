@@ -12,10 +12,18 @@ const RichTextEditor = dynamic(
   { ssr: false }
 );
 
+interface ServiceTag {
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
+}
+
 export default function EditServicePage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serviceTags, setServiceTags] = useState<ServiceTag[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     category: "サービスカテゴリ",
@@ -24,12 +32,25 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
     summary: "",
     image: "",
     tags: [] as string[],
+    image_display_mode: "contain" as "contain" | "cover",
   });
-  const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
+    loadServiceTags();
     loadService();
   }, []);
+
+  const loadServiceTags = async () => {
+    try {
+      const response = await fetch("/api/admin/tags/services");
+      if (response.ok) {
+        const tags = await response.json();
+        setServiceTags(tags);
+      }
+    } catch (error) {
+      console.error("Failed to load service tags:", error);
+    }
+  };
 
   const loadService = async () => {
     try {
@@ -44,6 +65,7 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
           summary: data.summary || "",
           image: data.image || "",
           tags: data.tags || [],
+          image_display_mode: data.image_display_mode || "contain",
         });
       } else {
         alert("サービスが見つかりません");
@@ -84,20 +106,15 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
     }
   };
 
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()],
-      });
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter((t) => t !== tag),
+  const toggleTag = (tagName: string) => {
+    setFormData((prev) => {
+      const isSelected = prev.tags.includes(tagName);
+      return {
+        ...prev,
+        tags: isSelected
+          ? prev.tags.filter((t) => t !== tagName)
+          : [...prev.tags, tagName],
+      };
     });
   };
 
@@ -169,6 +186,22 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
           />
         </div>
 
+        {/* Image Display Mode */}
+        <div>
+          <label htmlFor="image_display_mode" className="block text-sm font-medium text-gray-700 mb-2">
+            画像表示モード
+          </label>
+          <select
+            id="image_display_mode"
+            value={formData.image_display_mode}
+            onChange={(e) => setFormData({ ...formData, image_display_mode: e.target.value as "contain" | "cover" })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="contain">比率を保つ（余白あり）</option>
+            <option value="cover">フル表示（見切れあり）</option>
+          </select>
+        </div>
+
         {/* Description */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
@@ -202,43 +235,36 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
         {/* Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            タグ
+            タグ（複数選択可）
           </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="タグを入力してEnter"
-            />
-            <button
-              type="button"
-              onClick={addTag}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              追加
-            </button>
+          <div className="flex flex-wrap gap-2">
+            {serviceTags.map((tag) => (
+              <button
+                key={tag.id}
+                type="button"
+                onClick={() => toggleTag(tag.name)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  formData.tags.includes(tag.name)
+                    ? "bg-primary-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+                style={
+                  formData.tags.includes(tag.name)
+                    ? { backgroundColor: tag.color, color: "white" }
+                    : {}
+                }
+              >
+                {tag.name}
+              </button>
+            ))}
           </div>
-          {formData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="hover:text-primary-900"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
+          {serviceTags.length === 0 && (
+            <p className="text-sm text-gray-500 mt-2">
+              タグが登録されていません。
+              <Link href="/admin/tags/services" className="text-primary-600 hover:underline ml-1">
+                タグを作成
+              </Link>
+            </p>
           )}
         </div>
 
