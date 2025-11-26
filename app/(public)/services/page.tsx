@@ -124,7 +124,7 @@ export default async function ServicesPage({
                   categories={service.categories}
                   title={service.title}
                   description={service.description}
-                  href={`/services/${service.id}`}
+                  href={`/services/${service.slug || service.id}`}
                   imageDisplayMode={service.image_display_mode}
                 />
               ))

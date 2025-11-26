@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-// Service role clientを使ってRLSをバイパス
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
 
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
@@ -19,9 +22,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabase();
     
-    // ニュース本体を取得
+    // ニュースを取得
     const { data: news, error } = await supabase
       .from('news')
       .select('*')
@@ -35,12 +38,13 @@ export async function GET(
       );
     }
 
-    // カテゴリ情報を取得
+    // カテゴリリレーションを取得
     const { data: relations } = await supabase
       .from('news_category_relations')
       .select('category_id')
       .eq('news_id', params.id);
 
+    // カテゴリ名を取得
     let categories: string[] = [];
     if (relations && relations.length > 0) {
       const categoryIds = relations.map(r => r.category_id);
@@ -49,7 +53,7 @@ export async function GET(
         .select('name')
         .in('id', categoryIds);
       
-      categories = categoryData?.map(c => c.name) || [];
+      categories = (categoryData || []).map(c => c.name);
     }
     
     return NextResponse.json({ ...news, categories });
@@ -68,9 +72,8 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabase();
     
-    // categoriesを除外してDBに保存するデータを準備
     const { categories, ...dbNews } = body;
     let updateData: any = { ...dbNews };
     
@@ -81,7 +84,6 @@ export async function PUT(
         .replace(/[^\w\-]+/g, '')
         .substring(0, 100);
       
-      // If slug is empty (e.g., Japanese title), use timestamp-based slug
       if (!slug || slug.length === 0) {
         slug = `news-${Date.now()}`;
       }
@@ -89,7 +91,6 @@ export async function PUT(
       updateData.slug = slug;
     }
     
-    // ニュースを更新
     const { data: updatedNews, error } = await supabase
       .from('news')
       .update(updateData)
@@ -110,23 +111,22 @@ export async function PUT(
         .delete()
         .eq('news_id', params.id);
 
-      // 新しいリレーションを作成
+      // 新しいリレーションを一括作成
       if (categories && categories.length > 0) {
-        for (const categoryName of categories) {
-          const { data: categoryData } = await supabase
-            .from('news_categories')
-            .select('id')
-            .eq('name', categoryName)
-            .single();
+        const { data: categoryData } = await supabase
+          .from('news_categories')
+          .select('id, name')
+          .in('name', categories);
 
-          if (categoryData) {
-            await supabase
-              .from('news_category_relations')
-              .insert({
-                news_id: params.id,
-                category_id: categoryData.id
-              });
-          }
+        if (categoryData && categoryData.length > 0) {
+          const relations = categoryData.map(cat => ({
+            news_id: params.id,
+            category_id: cat.id
+          }));
+
+          await supabase
+            .from('news_category_relations')
+            .insert(relations);
         }
       }
     }
@@ -146,9 +146,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = getSupabaseAdmin();
-    
-    console.log('Attempting to delete news with ID:', params.id);
+    const supabase = getSupabase();
     
     // カテゴリリレーションはCASCADEで自動削除される
     const { error } = await supabase
@@ -161,7 +159,6 @@ export async function DELETE(
       throw error;
     }
     
-    console.log('News deleted successfully:', params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete news:", error);

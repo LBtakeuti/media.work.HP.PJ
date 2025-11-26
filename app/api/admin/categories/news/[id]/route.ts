@@ -1,49 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
-
-// PUT: Update a news category
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const body = await request.json();
-    const { name, color } = body;
+    const { name, slug, color } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Invalid category name" }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdmin();
-
-    // Generate slug from name (auto-generated only)
-    let slug = name
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
-      .substring(0, 100);
-
-    if (!slug) {
-      slug = `category-${Date.now()}`;
+    if (!slug || typeof slug !== "string") {
+      return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
     }
 
-    const updateData: any = {
-      name,
-      slug,
-    };
+    const supabase = getSupabaseAdmin();
 
+    const updateData: any = { name, slug };
     if (color) {
       updateData.color = color;
     }
@@ -71,7 +47,6 @@ export async function PUT(
   }
 }
 
-// DELETE: Delete a news category
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -95,4 +70,3 @@ export async function DELETE(
     return NextResponse.json({ error: "Failed to delete news category" }, { status: 500 });
   }
 }
-

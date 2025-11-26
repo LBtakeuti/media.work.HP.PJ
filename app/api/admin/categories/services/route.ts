@@ -1,19 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
-
-// GET: Fetch all service categories
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
@@ -35,7 +22,6 @@ export async function GET() {
   }
 }
 
-// POST: Create a new service category
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -47,7 +33,6 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    // Generate slug from name (auto-generated only)
     let slug = name
       .toLowerCase()
       .replace(/\s+/g, '-')
@@ -58,7 +43,6 @@ export async function POST(request: NextRequest) {
       slug = `category-${Date.now()}`;
     }
 
-    // Get the highest sort_order
     const { data: existingCategories } = await supabase
       .from('service_categories')
       .select('sort_order')
@@ -96,4 +80,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create service category" }, { status: 500 });
   }
 }
-

@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-// Service role clientを使ってRLSをバイパス
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
 
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
@@ -16,42 +19,61 @@ function getSupabaseAdmin() {
 
 export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabase();
     
-    // ニュース一覧を取得
+    // まずニュース一覧を取得
     const { data: news, error } = await supabase
       .from('news')
       .select('*')
-      .order('date', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching news:', error);
-      throw error;
+      return NextResponse.json(
+        { error: "Failed to get news" },
+        { status: 500 }
+      );
     }
 
-    // 各ニュースにカテゴリ情報を追加
-    const newsWithCategories = await Promise.all(
-      (news || []).map(async (item) => {
-        const { data: relations } = await supabase
-          .from('news_category_relations')
-          .select('category_id')
-          .eq('news_id', item.id);
+    if (!news || news.length === 0) {
+      return NextResponse.json([]);
+    }
 
-        if (relations && relations.length > 0) {
-          const categoryIds = relations.map(r => r.category_id);
-          const { data: categories } = await supabase
-            .from('news_categories')
-            .select('name')
-            .in('id', categoryIds);
-          
-          return {
-            ...item,
-            categories: categories?.map(c => c.name) || []
-          };
-        }
-        return { ...item, categories: [] };
-      })
-    );
+    // 全ニュースのカテゴリリレーションを一括取得
+    const newsIds = news.map(n => n.id);
+    const { data: relations } = await supabase
+      .from('news_category_relations')
+      .select('news_id, category_id')
+      .in('news_id', newsIds);
+
+    // カテゴリIDを一括取得
+    const categoryIds = [...new Set((relations || []).map(r => r.category_id))];
+    let categoriesMap: Record<string, string> = {};
+    
+    if (categoryIds.length > 0) {
+      const { data: categories } = await supabase
+        .from('news_categories')
+        .select('id, name')
+        .in('id', categoryIds);
+      
+      categoriesMap = (categories || []).reduce((acc, cat) => {
+        acc[cat.id] = cat.name;
+        return acc;
+      }, {} as Record<string, string>);
+    }
+
+    // ニュースにカテゴリを付与
+    const newsWithCategories = news.map(item => {
+      const itemRelations = (relations || []).filter(r => r.news_id === item.id);
+      const categories = itemRelations
+        .map(r => categoriesMap[r.category_id])
+        .filter(Boolean);
+      
+      return {
+        ...item,
+        categories
+      };
+    });
 
     return NextResponse.json(newsWithCategories);
   } catch (error) {
@@ -66,21 +88,30 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabase();
     
-    // Generate slug from title or use timestamp as fallback
-    let slug = body.title
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
-      .substring(0, 100);
-    
-    // If slug is empty (e.g., Japanese title), use timestamp-based slug
-    if (!slug || slug.length === 0) {
-      slug = `news-${Date.now()}`;
-    }
+    // 自動採番でスラッグを生成 (news-1, news-2, ...)
+    const { data: existingNews } = await supabase
+      .from('news')
+      .select('slug')
+      .like('slug', 'news-%')
+      .order('created_at', { ascending: false });
 
-    // Prepare data for database (remove categories as it's managed via relations)
+    let maxNumber = 0;
+    if (existingNews) {
+      for (const item of existingNews) {
+        const match = item.slug?.match(/^news-(\d+)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          // タイムスタンプ形式（10桁以上）は除外し、連番のみを対象とする
+          if (num < 100000 && num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      }
+    }
+    const slug = `news-${maxNumber + 1}`;
+
     const { categories, ...dbNews } = body;
     
     const newsData = {
@@ -101,23 +132,23 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    // カテゴリのリレーションを作成
+    // カテゴリのリレーションを一括作成
     if (newNews && categories && categories.length > 0) {
-      for (const categoryName of categories) {
-        const { data: categoryData } = await supabase
-          .from('news_categories')
-          .select('id')
-          .eq('name', categoryName)
-          .single();
+      // カテゴリ名からIDを一括取得
+      const { data: categoryData } = await supabase
+        .from('news_categories')
+        .select('id, name')
+        .in('name', categories);
 
-        if (categoryData) {
-          await supabase
-            .from('news_category_relations')
-            .insert({
-              news_id: newNews.id,
-              category_id: categoryData.id
-            });
-        }
+      if (categoryData && categoryData.length > 0) {
+        const relations = categoryData.map(cat => ({
+          news_id: newNews.id,
+          category_id: cat.id
+        }));
+
+        await supabase
+          .from('news_category_relations')
+          .insert(relations);
       }
     }
 

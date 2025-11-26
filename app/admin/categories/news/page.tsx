@@ -150,17 +150,18 @@ export default function AdminNewsCategoriesPage() {
       {/* Create New Category */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <h2 className="text-lg font-bold text-gray-900 mb-4">新しいカテゴリを作成</h2>
-        <form onSubmit={handleCreate} className="flex gap-2 items-end">
+        <form onSubmit={handleCreate} className="flex gap-4 items-end">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              カテゴリ名
+              カテゴリ名 *
             </label>
             <input
               type="text"
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="カテゴリ名を入力"
+              placeholder="例: お知らせ"
+              required
             />
           </div>
           <div>

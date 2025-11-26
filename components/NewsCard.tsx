@@ -11,7 +11,7 @@ interface NewsCardProps {
 export default function NewsCard({ item }: NewsCardProps) {
   return (
     <Link
-      href={`/news/${item.id}`}
+      href={`/news/${item.slug || item.id}`}
       className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow border border-gray-100 group"
     >
       {/* Image Section */}

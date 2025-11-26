@@ -188,7 +188,7 @@ export async function getNews(): Promise<NewsItem[]> {
   const { data, error } = await supabase
     .from('news')
     .select('*')
-    .order('date', { ascending: false });
+    .order('updated_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching news:', error);
@@ -295,17 +295,62 @@ export async function getNewsById(id: string): Promise<NewsItem | null> {
   return { ...data, categories: [] };
 }
 
-export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> {
-  // Generate slug from title
-  let slug = news.title
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .substring(0, 100);
+export async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .eq('slug', slug)
+    .single();
 
-  if (!slug || slug.length === 0) {
-    slug = `news-${Date.now()}`;
+  if (error) {
+    console.error('Error fetching news by slug:', error);
+    return null;
   }
+
+  // カテゴリ情報を取得
+  const { data: relations } = await supabase
+    .from('news_category_relations')
+    .select('category_id')
+    .eq('news_id', data.id);
+
+  if (relations && relations.length > 0) {
+    const categoryIds = relations.map(r => r.category_id);
+    const { data: categories } = await supabase
+      .from('news_categories')
+      .select('name')
+      .in('id', categoryIds);
+    
+    return {
+      ...data,
+      categories: categories?.map(c => c.name) || []
+    };
+  }
+
+  return { ...data, categories: [] };
+}
+
+export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> {
+  // 自動採番でスラッグを生成 (news-1, news-2, ...)
+  const { data: existingNews } = await supabase
+    .from('news')
+    .select('slug')
+    .like('slug', 'news-%')
+    .order('created_at', { ascending: false });
+
+  let maxNumber = 0;
+  if (existingNews) {
+    for (const item of existingNews) {
+      const match = item.slug?.match(/^news-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        // タイムスタンプ形式（10桁以上）は除外し、連番のみを対象とする
+        if (num < 100000 && num > maxNumber) {
+          maxNumber = num;
+        }
+      }
+    }
+  }
+  const slug = `news-${maxNumber + 1}`;
 
   // Prepare data for database (remove categories as it's managed via relations)
   const { categories, ...dbNews } = news;
@@ -541,17 +586,62 @@ export async function getServiceById(id: string): Promise<ServiceItem | null> {
   return { ...data, categories: [] };
 }
 
-export async function createService(service: Omit<ServiceItem, 'id'>): Promise<ServiceItem> {
-  // Generate slug from title
-  let slug = service.title
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .substring(0, 100);
+export async function getServiceBySlug(slug: string): Promise<ServiceItem | null> {
+  const { data, error } = await supabase
+    .from('services')
+    .select('*')
+    .eq('slug', slug)
+    .single();
 
-  if (!slug || slug.length === 0) {
-    slug = `service-${Date.now()}`;
+  if (error) {
+    console.error('Error fetching service by slug:', error);
+    return null;
   }
+
+  // カテゴリ情報を取得
+  const { data: relations } = await supabase
+    .from('service_category_relations')
+    .select('category_id')
+    .eq('service_id', data.id);
+
+  if (relations && relations.length > 0) {
+    const categoryIds = relations.map(r => r.category_id);
+    const { data: categories } = await supabase
+      .from('service_categories')
+      .select('name')
+      .in('id', categoryIds);
+    
+    return {
+      ...data,
+      categories: categories?.map(c => c.name) || []
+    };
+  }
+
+  return { ...data, categories: [] };
+}
+
+export async function createService(service: Omit<ServiceItem, 'id'>): Promise<ServiceItem> {
+  // 自動採番でスラッグを生成 (service-1, service-2, ...)
+  const { data: existingServices } = await supabase
+    .from('services')
+    .select('slug')
+    .like('slug', 'service-%')
+    .order('created_at', { ascending: false });
+
+  let maxNumber = 0;
+  if (existingServices) {
+    for (const item of existingServices) {
+      const match = item.slug?.match(/^service-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        // タイムスタンプ形式（10桁以上）は除外し、連番のみを対象とする
+        if (num < 100000 && num > maxNumber) {
+          maxNumber = num;
+        }
+      }
+    }
+  }
+  const slug = `service-${maxNumber + 1}`;
 
   // Prepare data for database (remove categories as it's managed via relations)
   const { categories, ...dbService } = service;

@@ -15,13 +15,30 @@ export default function AdminNewsPage() {
     loadNews();
   }, []);
 
+  const [error, setError] = useState<string | null>(null);
+
   const loadNews = async () => {
     try {
+      setError(null);
       const response = await fetch("/api/admin/news");
       const data = await response.json();
-      setNews(data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || "ニュースの取得に失敗しました");
+      }
+      
+      // 配列であることを確認
+      if (Array.isArray(data)) {
+        setNews(data);
+      } else {
+        console.error("Unexpected response format:", data);
+        setNews([]);
+        setError("データ形式が不正です");
+      }
     } catch (error) {
       console.error("Failed to load news:", error);
+      setError(error instanceof Error ? error.message : "ニュースの取得に失敗しました");
+      setNews([]);
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +71,25 @@ export default function AdminNewsPage() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-gray-600">読み込み中...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setIsLoading(true);
+              loadNews();
+            }}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            再試行
+          </button>
+        </div>
       </div>
     );
   }

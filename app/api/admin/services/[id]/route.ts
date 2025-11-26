@@ -1,18 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from '@supabase/supabase-js';
-
-// Service role clientを使ってRLSをバイパス
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET(
   request: Request,
@@ -21,10 +8,17 @@ export async function GET(
   try {
     const supabase = getSupabaseAdmin();
     
-    // サービス本体を取得
+    // サービスとカテゴリを一度に取得
     const { data: service, error } = await supabase
       .from('services')
-      .select('*')
+      .select(`
+        *,
+        service_category_relations (
+          service_categories (
+            name
+          )
+        )
+      `)
       .eq('id', params.id)
       .single();
     
@@ -35,24 +29,14 @@ export async function GET(
       );
     }
 
-    // カテゴリ情報を取得
-    const { data: relations } = await supabase
-      .from('service_category_relations')
-      .select('category_id')
-      .eq('service_id', params.id);
-
-    let categories: string[] = [];
-    if (relations && relations.length > 0) {
-      const categoryIds = relations.map(r => r.category_id);
-      const { data: categoryData } = await supabase
-        .from('service_categories')
-        .select('name')
-        .in('id', categoryIds);
-      
-      categories = categoryData?.map(c => c.name) || [];
-    }
+    // カテゴリ名を配列に変換
+    const categories = service.service_category_relations
+      ?.map((rel: any) => rel.service_categories?.name)
+      .filter(Boolean) || [];
     
-    return NextResponse.json({ ...service, categories });
+    const { service_category_relations, ...serviceItem } = service;
+    
+    return NextResponse.json({ ...serviceItem, categories });
   } catch (error) {
     console.error("Failed to get service:", error);
     return NextResponse.json(
@@ -70,7 +54,6 @@ export async function PUT(
     const body = await request.json();
     const supabase = getSupabaseAdmin();
     
-    // categoriesを除外してDBに保存するデータを準備
     const { categories, ...dbService } = body;
     let updateData: any = { ...dbService };
     
@@ -81,7 +64,6 @@ export async function PUT(
         .replace(/[^\w\-]+/g, '')
         .substring(0, 100);
       
-      // If slug is empty (e.g., Japanese title), use timestamp-based slug
       if (!slug || slug.length === 0) {
         slug = `service-${Date.now()}`;
       }
@@ -89,7 +71,6 @@ export async function PUT(
       updateData.slug = slug;
     }
     
-    // サービスを更新
     const { data: updatedService, error } = await supabase
       .from('services')
       .update(updateData)
@@ -104,29 +85,26 @@ export async function PUT(
 
     // カテゴリが提供された場合、リレーションを更新
     if (categories !== undefined) {
-      // 既存のリレーションを削除
       await supabase
         .from('service_category_relations')
         .delete()
         .eq('service_id', params.id);
 
-      // 新しいリレーションを作成
       if (categories && categories.length > 0) {
-        for (const categoryName of categories) {
-          const { data: categoryData } = await supabase
-            .from('service_categories')
-            .select('id')
-            .eq('name', categoryName)
-            .single();
+        const { data: categoryData } = await supabase
+          .from('service_categories')
+          .select('id, name')
+          .in('name', categories);
 
-          if (categoryData) {
-            await supabase
-              .from('service_category_relations')
-              .insert({
-                service_id: params.id,
-                category_id: categoryData.id
-              });
-          }
+        if (categoryData && categoryData.length > 0) {
+          const relations = categoryData.map(cat => ({
+            service_id: params.id,
+            category_id: cat.id
+          }));
+
+          await supabase
+            .from('service_category_relations')
+            .insert(relations);
         }
       }
     }
@@ -148,9 +126,6 @@ export async function DELETE(
   try {
     const supabase = getSupabaseAdmin();
     
-    console.log('Attempting to delete service with ID:', params.id);
-    
-    // カテゴリリレーションはCASCADEで自動削除される
     const { error } = await supabase
       .from('services')
       .delete()
@@ -161,7 +136,6 @@ export async function DELETE(
       throw error;
     }
     
-    console.log('Service deleted successfully:', params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete service:", error);

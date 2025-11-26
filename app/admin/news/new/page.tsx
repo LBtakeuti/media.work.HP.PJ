@@ -202,10 +202,6 @@ export default function NewNewsPage() {
             <option value="contain">比率を保つ（余白あり）</option>
             <option value="cover">フル表示（見切れあり）</option>
           </select>
-          <p className="mt-1 text-sm text-gray-500">
-            「比率を保つ」: 画像全体が表示され、左右または上下に余白が生じます<br />
-            「フル表示」: カード全体に画像が広がりますが、一部見切れる場合があります
-          </p>
         </div>
 
         {/* Summary */}
@@ -232,9 +228,6 @@ export default function NewNewsPage() {
             content={formData.content}
             onChange={(html) => setFormData({ ...formData, content: html })}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            リッチテキストエディタで本文を作成できます。
-          </p>
         </div>
 
         {/* Submit Buttons */}

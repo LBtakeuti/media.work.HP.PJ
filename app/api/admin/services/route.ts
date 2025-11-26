@@ -1,27 +1,21 @@
 import { NextResponse } from "next/server";
-import { createClient } from '@supabase/supabase-js';
-
-// Service role clientを使ってRLSをバイパス
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     
-    // サービス一覧を取得
+    // サービス一覧とカテゴリを一度に取得（JOINクエリ）
     const { data: services, error } = await supabase
       .from('services')
-      .select('*')
+      .select(`
+        *,
+        service_category_relations (
+          service_categories (
+            name
+          )
+        )
+      `)
       .order('sort_order', { ascending: true });
 
     if (error) {
@@ -29,29 +23,18 @@ export async function GET() {
       throw error;
     }
 
-    // 各サービスにカテゴリ情報を追加
-    const servicesWithCategories = await Promise.all(
-      (services || []).map(async (item) => {
-        const { data: relations } = await supabase
-          .from('service_category_relations')
-          .select('category_id')
-          .eq('service_id', item.id);
-
-        if (relations && relations.length > 0) {
-          const categoryIds = relations.map(r => r.category_id);
-          const { data: categories } = await supabase
-            .from('service_categories')
-            .select('name')
-            .in('id', categoryIds);
-          
-          return {
-            ...item,
-            categories: categories?.map(c => c.name) || []
-          };
-        }
-        return { ...item, categories: [] };
-      })
-    );
+    // カテゴリ名を配列に変換
+    const servicesWithCategories = (services || []).map(item => {
+      const categories = item.service_category_relations
+        ?.map((rel: any) => rel.service_categories?.name)
+        .filter(Boolean) || [];
+      
+      const { service_category_relations, ...serviceItem } = item;
+      return {
+        ...serviceItem,
+        categories
+      };
+    });
 
     return NextResponse.json(servicesWithCategories);
   } catch (error) {
@@ -68,19 +51,28 @@ export async function POST(request: Request) {
     const body = await request.json();
     const supabase = getSupabaseAdmin();
     
-    // Generate slug from title or use timestamp as fallback
-    let slug = body.title
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
-      .substring(0, 100);
-    
-    // If slug is empty (e.g., Japanese title), use timestamp-based slug
-    if (!slug || slug.length === 0) {
-      slug = `service-${Date.now()}`;
-    }
+    // 自動採番でスラッグを生成 (service-1, service-2, ...)
+    const { data: existingServices } = await supabase
+      .from('services')
+      .select('slug')
+      .like('slug', 'service-%')
+      .order('created_at', { ascending: false });
 
-    // Prepare data for database (remove categories as it's managed via relations)
+    let maxNumber = 0;
+    if (existingServices) {
+      for (const item of existingServices) {
+        const match = item.slug?.match(/^service-(\d+)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          // タイムスタンプ形式（10桁以上）は除外し、連番のみを対象とする
+          if (num < 100000 && num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      }
+    }
+    const slug = `service-${maxNumber + 1}`;
+
     const { categories, ...dbService } = body;
     
     const serviceData = {
@@ -101,23 +93,22 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    // カテゴリのリレーションを作成
+    // カテゴリのリレーションを一括作成
     if (newService && categories && categories.length > 0) {
-      for (const categoryName of categories) {
-        const { data: categoryData } = await supabase
-          .from('service_categories')
-          .select('id')
-          .eq('name', categoryName)
-          .single();
+      const { data: categoryData } = await supabase
+        .from('service_categories')
+        .select('id, name')
+        .in('name', categories);
 
-        if (categoryData) {
-          await supabase
-            .from('service_category_relations')
-            .insert({
-              service_id: newService.id,
-              category_id: categoryData.id
-            });
-        }
+      if (categoryData && categoryData.length > 0) {
+        const relations = categoryData.map(cat => ({
+          service_id: newService.id,
+          category_id: cat.id
+        }));
+
+        await supabase
+          .from('service_category_relations')
+          .insert(relations);
       }
     }
 

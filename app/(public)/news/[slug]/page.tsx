@@ -1,16 +1,18 @@
-import { getServiceById } from "@/lib/supabase-data";
+import { getNewsBySlug } from "@/lib/supabase-data";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 
-export default async function ServiceDetailPage({
+export default async function NewsDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: { slug: string };
 }) {
-  const service = await getServiceById(params.id);
+  const news = await getNewsBySlug(params.slug);
 
-  if (!service) {
+  if (!news) {
     notFound();
   }
 
@@ -25,53 +27,58 @@ export default async function ServiceDetailPage({
             </Link>
             <span>/</span>
             <Link
-              href="/services"
+              href="/news"
               className="hover:text-primary-600 transition-colors"
             >
-              事業案内
+              ニュース
             </Link>
             <span>/</span>
-            <span className="text-gray-900">{service.title}</span>
+            <span className="text-gray-900">{news.title}</span>
           </nav>
         </div>
       </div>
 
-      {/* Service Content */}
+      {/* Article Content */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Categories */}
-        {service.categories && service.categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {service.categories.map((category, index) => (
-              <span 
-                key={index}
-                className="inline-block px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded"
-              >
-                {category}
-              </span>
-            ))}
-          </div>
-        )}
+        {/* Categories & Date */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          {news.categories && news.categories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {news.categories.map((category, index) => (
+                <span 
+                  key={index}
+                  className="inline-block px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          )}
+          <time className="text-sm text-gray-600">
+            {format(new Date(news.date), "yyyy年MM月dd日", { locale: ja })}
+          </time>
+        </div>
 
         {/* Title */}
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-          {service.title}
+          {news.title}
         </h1>
 
         {/* Summary */}
-        {service.summary && (
-          <div className="text-lg text-gray-700 mb-8 p-6 bg-gray-50 rounded-lg border-l-4 border-primary-600">
-            {service.summary}
+        {news.summary && (
+          <div className="text-lg text-gray-700 mb-8 p-6 bg-gray-50 rounded-lg">
+            {news.summary}
           </div>
         )}
 
         {/* Main Image */}
-        {service.image && (
+        {news.image && (
           <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden bg-gray-100">
             <Image
-              src={service.image}
-              alt={service.title}
+              src={news.image}
+              alt={news.title}
               fill
-              className={service.image_display_mode === "cover" ? "object-cover" : "object-contain"}
+              className={news.image_display_mode === "cover" ? "object-cover" : "object-contain"}
               priority
             />
           </div>
@@ -81,13 +88,13 @@ export default async function ServiceDetailPage({
         {/* Content */}
         <div
           className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: service.content || "" }}
+          dangerouslySetInnerHTML={{ __html: news.content || "" }}
         />
 
-        {/* Back to Services List */}
+        {/* Back to News List */}
         <div className="mt-12 pt-8 border-t border-gray-200">
           <Link
-            href="/services"
+            href="/news"
             className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium transition-colors"
           >
             <svg
@@ -103,11 +110,10 @@ export default async function ServiceDetailPage({
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            事業案内一覧に戻る
+            ニュース一覧に戻る
           </Link>
         </div>
       </article>
     </div>
   );
 }
-

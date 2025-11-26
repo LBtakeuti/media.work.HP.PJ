@@ -90,7 +90,7 @@ export default function AdminLayout({
   }
 
   const navItems = [
-    { href: "/admin/dashboard", label: "ダッシュボード" },
+    { href: "/admin", label: "ダッシュボード" },
     { href: "/admin/news", label: "ニュース管理" },
     { href: "/admin/services", label: "サービス管理" },
     { href: "/admin/contacts", label: "お問い合わせ" },
@@ -142,7 +142,10 @@ export default function AdminLayout({
         <aside className="w-64 bg-white shadow-sm min-h-[calc(100vh-4rem)]">
           <nav className="p-4 space-y-1">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              // ダッシュボードは完全一致、それ以外は前方一致
+              const isActive = item.href === "/admin" 
+                ? pathname === "/admin"
+                : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}

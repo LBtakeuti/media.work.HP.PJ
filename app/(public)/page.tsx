@@ -109,7 +109,7 @@ export default async function Home() {
                 categories={service.categories}
                 imageSrc={service.image}
                 imageAlt={service.title}
-                href={`/services/${service.id}`}
+                href={`/services/${service.slug || service.id}`}
                 imageDisplayMode={service.image_display_mode}
               />
             ))}
