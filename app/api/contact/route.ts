@@ -11,7 +11,8 @@ const rateLimitStore = new Map<string, number[]>();
 // 古いエントリを削除する関数
 function cleanupOldEntries() {
   const now = Date.now();
-  for (const [email, timestamps] of rateLimitStore.entries()) {
+  const entries = Array.from(rateLimitStore.entries());
+  for (const [email, timestamps] of entries) {
     const validTimestamps = timestamps.filter(
       (timestamp) => now - timestamp < RATE_LIMIT_WINDOW
     );
