@@ -31,6 +31,7 @@ export default function ServiceCard({
           alt={imageAlt || title}
           fill
           className={imageDisplayMode === "cover" ? "object-cover" : "object-contain"}
+          unoptimized={imageSrc?.startsWith("data:")}
         />
         {/* Overlay for hover effect */}
         <div className="absolute inset-0 bg-[#E6E6E6] opacity-0 group-hover:opacity-30 group-active:opacity-30 transition-opacity duration-200"></div>

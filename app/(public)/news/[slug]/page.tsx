@@ -80,6 +80,7 @@ export default async function NewsDetailPage({
               fill
               className={news.image_display_mode === "cover" ? "object-cover" : "object-contain"}
               priority
+              unoptimized={news.image?.startsWith("data:")}
             />
           </div>
         )}

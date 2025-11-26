@@ -14,7 +14,7 @@ export default function ContactThanksPage() {
             <div className="mb-12 flex justify-center">
               <div className="relative w-64 h-64 md:w-80 md:h-80">
                 <Image
-                  src="/1513415838.png"
+                  src="/thanks.png"
                   alt="お問い合わせありがとうございます"
                   fill
                   className="object-contain"

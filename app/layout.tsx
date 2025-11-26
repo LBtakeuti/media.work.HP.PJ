@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   title: "株式会社メディア・ワーク",
   description: "1975年創業、東京の印刷製版会社から進化したメディア制作のプロ集団。組版・グラフィックデザインからAI動画撮影サービスSAVREQ、Web制作まで、企画から運営までワンストップでサポート。伝統と革新を融合し、心に残る瞬間を未来へ届けます。",
   icons: {
-    icon: "/ogp_logo1.svg",
-    apple: "/ogp_logo1.svg",
+    icon: "/favicon_logo1.svg",
+    apple: "/favicon_logo1.svg",
   },
   openGraph: {
     title: "株式会社メディア・ワーク",

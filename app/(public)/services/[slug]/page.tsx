@@ -73,6 +73,7 @@ export default async function ServiceDetailPage({
               fill
               className={service.image_display_mode === "cover" ? "object-cover" : "object-contain"}
               priority
+              unoptimized={service.image?.startsWith("data:")}
             />
           </div>
         )}

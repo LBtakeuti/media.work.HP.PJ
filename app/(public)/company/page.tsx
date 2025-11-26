@@ -20,7 +20,7 @@ export default function CompanyPage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/lighthouse-6915406_1280.jpg"
+            src="/company-back.jpg"
             alt=""
             fill
             className="object-cover"

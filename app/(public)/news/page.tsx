@@ -35,7 +35,7 @@ export default async function NewsPage({
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/photo-1641384687356-02f2cdd30ed5.avif"
+            src="/NEWS-back.avif"
             alt=""
             fill
             className="object-cover"

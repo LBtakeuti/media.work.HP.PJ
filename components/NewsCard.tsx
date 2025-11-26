@@ -21,6 +21,7 @@ export default function NewsCard({ item }: NewsCardProps) {
           alt={item.title}
           fill
           className={item.image_display_mode === "cover" ? "object-cover" : "object-contain"}
+          unoptimized={item.image?.startsWith("data:")}
         />
       </div>
       

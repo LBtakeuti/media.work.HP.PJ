@@ -30,7 +30,7 @@ export default async function Home() {
         {/* Background Image */}
         <div className="absolute top-0 bottom-0 left-4 right-4 md:left-8 md:right-8 z-0 rounded-lg overflow-hidden">
           <Image
-            src="/photo-1451976426598-a7593bd6d0b2.avif"
+            src="/TOP-photo.avif"
             alt=""
             fill
             className="object-cover"
