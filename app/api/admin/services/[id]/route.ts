@@ -54,7 +54,8 @@ export async function PUT(
     const body = await request.json();
     const supabase = getSupabaseAdmin();
     
-    const { categories, ...dbService } = body;
+    // id, created_at, categoriesは更新対象から除外
+    const { categories, id, created_at, ...dbService } = body;
     let updateData: any = { ...dbService };
     
     if (dbService.title) {

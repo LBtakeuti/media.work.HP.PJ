@@ -74,7 +74,8 @@ export async function PUT(
     const body = await request.json();
     const supabase = getSupabase();
     
-    const { categories, ...dbNews } = body;
+    // id, created_at, categoriesは更新対象から除外
+    const { categories, id, created_at, ...dbNews } = body;
     let updateData: any = { ...dbNews };
     
     if (dbNews.title) {
