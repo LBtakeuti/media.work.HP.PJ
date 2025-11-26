@@ -310,9 +310,12 @@ export async function getServiceById(id: string): Promise<ServiceItem | null> {
 }
 
 export async function createService(service: Omit<ServiceItem, 'id'>): Promise<ServiceItem> {
-  const { data, error } = await supabase
+  // Prepare data for database (remove tags as it's not in DB schema)
+  const { tags, ...dbService } = service;
+
+  const { data: newService, error } = await supabase
     .from('services')
-    .insert([service])
+    .insert([dbService])
     .select()
     .single();
 
@@ -321,13 +324,38 @@ export async function createService(service: Omit<ServiceItem, 'id'>): Promise<S
     throw error;
   }
 
-  return data;
+  // タグの紐付けを作成（tagsがある場合）
+  if (newService && tags && tags.length > 0) {
+    for (const tagName of tags) {
+      // タグを検索
+      const { data: tagData } = await supabase
+        .from('service_tags')
+        .select('id')
+        .eq('name', tagName)
+        .single();
+
+      if (tagData) {
+        // service_tag_relationsに紐付けを作成
+        await supabase
+          .from('service_tag_relations')
+          .insert({
+            service_id: newService.id,
+            tag_id: tagData.id
+          });
+      }
+    }
+  }
+
+  return newService;
 }
 
 export async function updateService(id: string, service: Partial<ServiceItem>): Promise<ServiceItem> {
-  const { data, error } = await supabase
+  // Prepare data for database (remove tags as it's not in DB schema)
+  const { tags, ...dbService } = service;
+
+  const { data: updatedService, error } = await supabase
     .from('services')
-    .update(service)
+    .update(dbService)
     .eq('id', id)
     .select()
     .single();
@@ -337,7 +365,34 @@ export async function updateService(id: string, service: Partial<ServiceItem>): 
     throw error;
   }
 
-  return data;
+  // タグが提供された場合、紐付けを更新
+  if (updatedService && tags && tags.length > 0) {
+    // 既存の紐付けを削除
+    await supabase
+      .from('service_tag_relations')
+      .delete()
+      .eq('service_id', id);
+
+    // 新しい紐付けを作成
+    for (const tagName of tags) {
+      const { data: tagData } = await supabase
+        .from('service_tags')
+        .select('id')
+        .eq('name', tagName)
+        .single();
+
+      if (tagData) {
+        await supabase
+          .from('service_tag_relations')
+          .insert({
+            service_id: id,
+            tag_id: tagData.id
+          });
+      }
+    }
+  }
+
+  return updatedService;
 }
 
 export async function deleteService(id: string): Promise<void> {
