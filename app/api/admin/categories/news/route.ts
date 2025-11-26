@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    // Generate slug from name
+    // Generate slug from name (auto-generated only)
     let slug = name
       .toLowerCase()
       .replace(/\s+/g, '-')

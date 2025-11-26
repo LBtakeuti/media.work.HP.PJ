@@ -18,6 +18,7 @@ export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     
+    // サービス一覧を取得
     const { data: services, error } = await supabase
       .from('services')
       .select('*')
@@ -28,7 +29,31 @@ export async function GET() {
       throw error;
     }
 
-    return NextResponse.json(services || []);
+    // 各サービスにカテゴリ情報を追加
+    const servicesWithCategories = await Promise.all(
+      (services || []).map(async (item) => {
+        const { data: relations } = await supabase
+          .from('service_category_relations')
+          .select('category_id')
+          .eq('service_id', item.id);
+
+        if (relations && relations.length > 0) {
+          const categoryIds = relations.map(r => r.category_id);
+          const { data: categories } = await supabase
+            .from('service_categories')
+            .select('name')
+            .in('id', categoryIds);
+          
+          return {
+            ...item,
+            categories: categories?.map(c => c.name) || []
+          };
+        }
+        return { ...item, categories: [] };
+      })
+    );
+
+    return NextResponse.json(servicesWithCategories);
   } catch (error) {
     console.error("Failed to get services:", error);
     return NextResponse.json(
@@ -55,8 +80,8 @@ export async function POST(request: Request) {
       slug = `service-${Date.now()}`;
     }
 
-    // Prepare data for database (remove tags as it's not in DB schema)
-    const { tags, ...dbService } = body;
+    // Prepare data for database (remove categories as it's managed via relations)
+    const { categories, ...dbService } = body;
     
     const serviceData = {
       ...dbService,
@@ -76,7 +101,27 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    return NextResponse.json(newService);
+    // カテゴリのリレーションを作成
+    if (newService && categories && categories.length > 0) {
+      for (const categoryName of categories) {
+        const { data: categoryData } = await supabase
+          .from('service_categories')
+          .select('id')
+          .eq('name', categoryName)
+          .single();
+
+        if (categoryData) {
+          await supabase
+            .from('service_category_relations')
+            .insert({
+              service_id: newService.id,
+              category_id: categoryData.id
+            });
+        }
+      }
+    }
+
+    return NextResponse.json({ ...newService, categories: categories || [] });
   } catch (error) {
     console.error("Failed to create service:", error);
     return NextResponse.json(
@@ -85,6 +130,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-
-

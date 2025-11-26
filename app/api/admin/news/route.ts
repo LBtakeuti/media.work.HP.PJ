@@ -18,6 +18,7 @@ export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     
+    // ニュース一覧を取得
     const { data: news, error } = await supabase
       .from('news')
       .select('*')
@@ -28,7 +29,31 @@ export async function GET() {
       throw error;
     }
 
-    return NextResponse.json(news || []);
+    // 各ニュースにカテゴリ情報を追加
+    const newsWithCategories = await Promise.all(
+      (news || []).map(async (item) => {
+        const { data: relations } = await supabase
+          .from('news_category_relations')
+          .select('category_id')
+          .eq('news_id', item.id);
+
+        if (relations && relations.length > 0) {
+          const categoryIds = relations.map(r => r.category_id);
+          const { data: categories } = await supabase
+            .from('news_categories')
+            .select('name')
+            .in('id', categoryIds);
+          
+          return {
+            ...item,
+            categories: categories?.map(c => c.name) || []
+          };
+        }
+        return { ...item, categories: [] };
+      })
+    );
+
+    return NextResponse.json(newsWithCategories);
   } catch (error) {
     console.error("Failed to get news:", error);
     return NextResponse.json(
@@ -55,8 +80,8 @@ export async function POST(request: Request) {
       slug = `news-${Date.now()}`;
     }
 
-    // Prepare data for database (remove tags as it's not in DB schema)
-    const { tags, ...dbNews } = body;
+    // Prepare data for database (remove categories as it's managed via relations)
+    const { categories, ...dbNews } = body;
     
     const newsData = {
       ...dbNews,
@@ -76,7 +101,27 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    return NextResponse.json(newNews);
+    // カテゴリのリレーションを作成
+    if (newNews && categories && categories.length > 0) {
+      for (const categoryName of categories) {
+        const { data: categoryData } = await supabase
+          .from('news_categories')
+          .select('id')
+          .eq('name', categoryName)
+          .single();
+
+        if (categoryData) {
+          await supabase
+            .from('news_category_relations')
+            .insert({
+              news_id: newNews.id,
+              category_id: categoryData.id
+            });
+        }
+      }
+    }
+
+    return NextResponse.json({ ...newNews, categories: categories || [] });
   } catch (error) {
     console.error("Failed to create news:", error);
     return NextResponse.json(

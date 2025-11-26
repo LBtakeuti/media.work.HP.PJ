@@ -197,9 +197,6 @@ export default function AdminServiceCategoriesPage() {
                   カテゴリ名
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  スラッグ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   作成日
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -235,9 +232,6 @@ export default function AdminServiceCategoriesPage() {
                         {category.name}
                       </span>
                     )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {category.slug}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(category.created_at).toLocaleDateString("ja-JP")}
@@ -288,4 +282,3 @@ export default function AdminServiceCategoriesPage() {
     </div>
   );
 }
-

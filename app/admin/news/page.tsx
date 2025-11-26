@@ -106,23 +106,22 @@ export default function AdminNewsPage() {
                     <div className="text-sm font-medium text-gray-900">
                       {item.title}
                     </div>
-                    {item.tags && item.tags.length > 0 && (
-                      <div className="flex gap-1 mt-1">
-                        {item.tags.map((tag) => (
+                  </td>
+                  <td className="px-6 py-4">
+                    {item.categories && item.categories.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {item.categories.map((category) => (
                           <span
-                            key={tag}
-                            className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+                            key={category}
+                            className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
                           >
-                            {tag}
+                            {category}
                           </span>
                         ))}
                       </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">未設定</span>
                     )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                      {item.category}
-                    </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {format(new Date(item.date), "yyyy年MM月dd日", {

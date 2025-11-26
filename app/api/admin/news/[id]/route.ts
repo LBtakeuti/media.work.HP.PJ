@@ -21,6 +21,7 @@ export async function GET(
   try {
     const supabase = getSupabaseAdmin();
     
+    // ニュース本体を取得
     const { data: news, error } = await supabase
       .from('news')
       .select('*')
@@ -33,8 +34,25 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // カテゴリ情報を取得
+    const { data: relations } = await supabase
+      .from('news_category_relations')
+      .select('category_id')
+      .eq('news_id', params.id);
+
+    let categories: string[] = [];
+    if (relations && relations.length > 0) {
+      const categoryIds = relations.map(r => r.category_id);
+      const { data: categoryData } = await supabase
+        .from('news_categories')
+        .select('name')
+        .in('id', categoryIds);
+      
+      categories = categoryData?.map(c => c.name) || [];
+    }
     
-    return NextResponse.json(news);
+    return NextResponse.json({ ...news, categories });
   } catch (error) {
     console.error("Failed to get news:", error);
     return NextResponse.json(
@@ -52,9 +70,9 @@ export async function PUT(
     const body = await request.json();
     const supabase = getSupabaseAdmin();
     
-    // tagsを除外してslugを生成
-    const { tags, ...dbNews } = body;
-    let updateData = dbNews;
+    // categoriesを除外してDBに保存するデータを準備
+    const { categories, ...dbNews } = body;
+    let updateData: any = { ...dbNews };
     
     if (dbNews.title) {
       let slug = dbNews.title
@@ -68,12 +86,10 @@ export async function PUT(
         slug = `news-${Date.now()}`;
       }
       
-      updateData = {
-        ...dbNews,
-        slug,
-      };
+      updateData.slug = slug;
     }
     
+    // ニュースを更新
     const { data: updatedNews, error } = await supabase
       .from('news')
       .update(updateData)
@@ -85,8 +101,37 @@ export async function PUT(
       console.error('Error updating news:', error);
       throw error;
     }
+
+    // カテゴリが提供された場合、リレーションを更新
+    if (categories !== undefined) {
+      // 既存のリレーションを削除
+      await supabase
+        .from('news_category_relations')
+        .delete()
+        .eq('news_id', params.id);
+
+      // 新しいリレーションを作成
+      if (categories && categories.length > 0) {
+        for (const categoryName of categories) {
+          const { data: categoryData } = await supabase
+            .from('news_categories')
+            .select('id')
+            .eq('name', categoryName)
+            .single();
+
+          if (categoryData) {
+            await supabase
+              .from('news_category_relations')
+              .insert({
+                news_id: params.id,
+                category_id: categoryData.id
+              });
+          }
+        }
+      }
+    }
     
-    return NextResponse.json(updatedNews);
+    return NextResponse.json({ ...updatedNews, categories: categories || [] });
   } catch (error) {
     console.error("Failed to update news:", error);
     return NextResponse.json(
@@ -105,6 +150,7 @@ export async function DELETE(
     
     console.log('Attempting to delete news with ID:', params.id);
     
+    // カテゴリリレーションはCASCADEで自動削除される
     const { error } = await supabase
       .from('news')
       .delete()

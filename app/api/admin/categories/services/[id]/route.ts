@@ -28,7 +28,7 @@ export async function PUT(
 
     const supabase = getSupabaseAdmin();
 
-    // Generate slug from name
+    // Generate slug from name (auto-generated only)
     let slug = name
       .toLowerCase()
       .replace(/\s+/g, '-')

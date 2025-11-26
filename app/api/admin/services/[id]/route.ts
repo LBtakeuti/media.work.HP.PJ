@@ -21,6 +21,7 @@ export async function GET(
   try {
     const supabase = getSupabaseAdmin();
     
+    // サービス本体を取得
     const { data: service, error } = await supabase
       .from('services')
       .select('*')
@@ -33,8 +34,25 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // カテゴリ情報を取得
+    const { data: relations } = await supabase
+      .from('service_category_relations')
+      .select('category_id')
+      .eq('service_id', params.id);
+
+    let categories: string[] = [];
+    if (relations && relations.length > 0) {
+      const categoryIds = relations.map(r => r.category_id);
+      const { data: categoryData } = await supabase
+        .from('service_categories')
+        .select('name')
+        .in('id', categoryIds);
+      
+      categories = categoryData?.map(c => c.name) || [];
+    }
     
-    return NextResponse.json(service);
+    return NextResponse.json({ ...service, categories });
   } catch (error) {
     console.error("Failed to get service:", error);
     return NextResponse.json(
@@ -52,9 +70,9 @@ export async function PUT(
     const body = await request.json();
     const supabase = getSupabaseAdmin();
     
-    // tagsを除外してslugを生成
-    const { tags, ...dbService } = body;
-    let updateData = dbService;
+    // categoriesを除外してDBに保存するデータを準備
+    const { categories, ...dbService } = body;
+    let updateData: any = { ...dbService };
     
     if (dbService.title) {
       let slug = dbService.title
@@ -68,12 +86,10 @@ export async function PUT(
         slug = `service-${Date.now()}`;
       }
       
-      updateData = {
-        ...dbService,
-        slug,
-      };
+      updateData.slug = slug;
     }
     
+    // サービスを更新
     const { data: updatedService, error } = await supabase
       .from('services')
       .update(updateData)
@@ -85,8 +101,37 @@ export async function PUT(
       console.error('Error updating service:', error);
       throw error;
     }
+
+    // カテゴリが提供された場合、リレーションを更新
+    if (categories !== undefined) {
+      // 既存のリレーションを削除
+      await supabase
+        .from('service_category_relations')
+        .delete()
+        .eq('service_id', params.id);
+
+      // 新しいリレーションを作成
+      if (categories && categories.length > 0) {
+        for (const categoryName of categories) {
+          const { data: categoryData } = await supabase
+            .from('service_categories')
+            .select('id')
+            .eq('name', categoryName)
+            .single();
+
+          if (categoryData) {
+            await supabase
+              .from('service_category_relations')
+              .insert({
+                service_id: params.id,
+                category_id: categoryData.id
+              });
+          }
+        }
+      }
+    }
     
-    return NextResponse.json(updatedService);
+    return NextResponse.json({ ...updatedService, categories: categories || [] });
   } catch (error) {
     console.error("Failed to update service:", error);
     return NextResponse.json(
@@ -105,6 +150,7 @@ export async function DELETE(
     
     console.log('Attempting to delete service with ID:', params.id);
     
+    // カテゴリリレーションはCASCADEで自動削除される
     const { error } = await supabase
       .from('services')
       .delete()
