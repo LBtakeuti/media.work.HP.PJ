@@ -20,7 +20,7 @@ export default function NewsCard({ item }: NewsCardProps) {
           src={item.image || "/sevilla-tower-g8a5d080a4_640.jpg"}
           alt={item.title}
           fill
-          className="object-contain"
+          className={item.image_display_mode === "cover" ? "object-cover" : "object-contain"}
         />
       </div>
       

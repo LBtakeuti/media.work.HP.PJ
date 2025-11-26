@@ -69,7 +69,7 @@ export default async function NewsDetailPage({
               src={news.image}
               alt={news.title}
               fill
-              className="object-contain"
+              className={news.image_display_mode === "cover" ? "object-cover" : "object-contain"}
               priority
             />
           </div>

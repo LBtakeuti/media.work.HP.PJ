@@ -29,6 +29,7 @@ export default function NewNewsPage() {
     content: "",
     image: "/sevilla-tower-g8a5d080a4_640.jpg",
     tags: [] as string[],
+    image_display_mode: "contain" as "contain" | "cover",
   });
   const [tagInput, setTagInput] = useState("");
 
@@ -174,6 +175,26 @@ export default function NewNewsPage() {
             value={formData.image}
             onChange={(image) => setFormData({ ...formData, image })}
           />
+        </div>
+
+        {/* Image Display Mode */}
+        <div>
+          <label htmlFor="image_display_mode" className="block text-sm font-medium text-gray-700 mb-2">
+            画像表示方法
+          </label>
+          <select
+            id="image_display_mode"
+            value={formData.image_display_mode}
+            onChange={(e) => setFormData({ ...formData, image_display_mode: e.target.value as "contain" | "cover" })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="contain">比率を保つ（余白あり）</option>
+            <option value="cover">フル表示（見切れあり）</option>
+          </select>
+          <p className="mt-1 text-sm text-gray-500">
+            「比率を保つ」: 画像全体が表示され、左右または上下に余白が生じます<br />
+            「フル表示」: カード全体に画像が広がりますが、一部見切れる場合があります
+          </p>
         </div>
 
         {/* Summary */}

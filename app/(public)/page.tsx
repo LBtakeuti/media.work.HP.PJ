@@ -110,6 +110,7 @@ export default async function Home() {
                 imageSrc={service.image}
                 imageAlt={service.title}
                 href={`/services/${service.id}`}
+                imageDisplayMode={service.image_display_mode}
               />
             ))}
             <ServiceCard

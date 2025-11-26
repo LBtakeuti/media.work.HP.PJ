@@ -13,6 +13,7 @@ export interface NewsItem {
   published?: boolean;
   published_at?: string;
   tags?: string[];
+  image_display_mode?: 'contain' | 'cover';
 }
 
 export interface ContactSubmission {
@@ -41,6 +42,7 @@ export interface ServiceItem {
   published?: boolean;
   published_at?: string;
   tags?: string[];
+  image_display_mode?: 'contain' | 'cover';
 }
 
 export interface Tag {

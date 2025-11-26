@@ -9,6 +9,7 @@ interface ServiceCardProps {
   imageSrc?: string;
   imageAlt?: string;
   href?: string;
+  imageDisplayMode?: 'contain' | 'cover';
 }
 
 export default function ServiceCard({
@@ -19,6 +20,7 @@ export default function ServiceCard({
   imageSrc = "/sevilla-tower-g8a5d080a4_640.jpg",
   imageAlt,
   href,
+  imageDisplayMode = 'contain',
 }: ServiceCardProps) {
   const CardContent = (
     <>
@@ -28,7 +30,7 @@ export default function ServiceCard({
           src={imageSrc}
           alt={imageAlt || title}
           fill
-          className="object-contain"
+          className={imageDisplayMode === "cover" ? "object-cover" : "object-contain"}
         />
         {/* Overlay for hover effect */}
         <div className="absolute inset-0 bg-[#E6E6E6] opacity-0 group-hover:opacity-30 group-active:opacity-30 transition-opacity duration-200"></div>

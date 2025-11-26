@@ -64,7 +64,7 @@ export default async function ServiceDetailPage({
               src={service.image}
               alt={service.title}
               fill
-              className="object-contain"
+              className={service.image_display_mode === "cover" ? "object-cover" : "object-contain"}
               priority
             />
           </div>
