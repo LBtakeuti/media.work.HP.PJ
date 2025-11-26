@@ -18,7 +18,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       content: '<p>サービス1の詳細な内容がここに表示されます。</p><p>お客様のニーズに合わせた最適なソリューションを提供いたします。</p>',
       date: '2025年11月17日',
       category: 'プレスリリース',
-      image: '/sevilla-tower-g8a5d080a4_640.jpg',
+      image: '/logo1.png',
       imageAlt: 'サービス1',
     },
     {
@@ -28,7 +28,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       content: '<p>サービス2の詳細な内容がここに表示されます。</p><p>最新のテクノロジーを活用したサービスです。</p>',
       date: '2025年11月17日',
       category: 'プレスリリース',
-      image: '/sevilla-tower-g8a5d080a4_640.jpg',
+      image: '/logo1.png',
       imageAlt: 'サービス2',
     },
     {
@@ -38,7 +38,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       content: '<p>サービス3の詳細な内容がここに表示されます。</p><p>信頼性の高いサービスを提供いたします。</p>',
       date: '2025年11月17日',
       category: 'プレスリリース',
-      image: '/sevilla-tower-g8a5d080a4_640.jpg',
+      image: '/logo1.png',
       imageAlt: 'サービス3',
     },
     {
@@ -48,7 +48,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       content: '<p>サービス4の詳細な内容がここに表示されます。</p><p>柔軟な対応が可能なサービスです。</p>',
       date: '2025年11月17日',
       category: 'プレスリリース',
-      image: '/sevilla-tower-g8a5d080a4_640.jpg',
+      image: '/logo1.png',
       imageAlt: 'サービス4',
     },
     {
@@ -58,7 +58,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       content: '<p>サービス5の詳細な内容がここに表示されます。</p><p>高品質なサービスをお約束します。</p>',
       date: '2025年11月17日',
       category: 'プレスリリース',
-      image: '/sevilla-tower-g8a5d080a4_640.jpg',
+      image: '/logo1.png',
       imageAlt: 'サービス5',
     },
     {
@@ -68,7 +68,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       content: '<p>サービス6の詳細な内容がここに表示されます。</p><p>お客様満足度No.1のサービスです。</p>',
       date: '2025年11月17日',
       category: 'プレスリリース',
-      image: '/sevilla-tower-g8a5d080a4_640.jpg',
+      image: '/logo1.png',
       imageAlt: 'サービス6',
     },
   ];

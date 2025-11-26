@@ -17,7 +17,7 @@ export default function ServiceCard({
   description,
   date,
   categories,
-  imageSrc = "/sevilla-tower-g8a5d080a4_640.jpg",
+  imageSrc = "/logo1.png",
   imageAlt,
   href,
   imageDisplayMode = 'contain',

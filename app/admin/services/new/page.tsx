@@ -27,7 +27,7 @@ export default function NewServicePage() {
     description: "",
     content: "",
     summary: "",
-    image: "/sevilla-tower-g8a5d080a4_640.jpg",
+    image: "/logo1.png",
     categories: [] as string[],
     image_display_mode: "contain" as "contain" | "cover",
   });

@@ -27,7 +27,7 @@ export default function NewNewsPage() {
     date: new Date().toISOString().split("T")[0],
     summary: "",
     content: "",
-    image: "/sevilla-tower-g8a5d080a4_640.jpg",
+    image: "/logo1.png",
     categories: [] as string[],
     image_display_mode: "contain" as "contain" | "cover",
   });
