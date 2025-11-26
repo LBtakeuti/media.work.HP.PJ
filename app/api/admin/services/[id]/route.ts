@@ -52,11 +52,15 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
+    console.log("PUT request body:", JSON.stringify(body).substring(0, 500));
+    
     const supabase = getSupabaseAdmin();
     
-    // id, created_at, categoriesは更新対象から除外
-    const { categories, id, created_at, ...dbService } = body;
+    // id, created_at, updated_at, categoriesは更新対象から除外
+    const { categories, id, created_at, updated_at, ...dbService } = body;
     let updateData: any = { ...dbService };
+    
+    console.log("Update data keys:", Object.keys(updateData));
     
     if (dbService.title) {
       let slug = dbService.title
@@ -111,10 +115,10 @@ export async function PUT(
     }
     
     return NextResponse.json({ ...updatedService, categories: categories || [] });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update service:", error);
     return NextResponse.json(
-      { error: "Failed to update service" },
+      { error: "Failed to update service", details: error?.message || String(error) },
       { status: 500 }
     );
   }
