@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ServiceCard from "@/components/ServiceCard";
-import { getServices } from "@/lib/data";
+import { getServices } from "@/lib/supabase-data";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

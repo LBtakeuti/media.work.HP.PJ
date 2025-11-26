@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ServiceItem } from "@/lib/data";
+import { ServiceItem } from "@/lib/supabase-data";
 
 export default function AdminServicesPage() {
   const [services, setServices] = useState<ServiceItem[]>([]);

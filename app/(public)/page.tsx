@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getNews, getServices } from "@/lib/data";
+import { getNews, getServices } from "@/lib/supabase-data";
 import NewsCard from "@/components/NewsCard";
 import ServiceCard from "@/components/ServiceCard";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";

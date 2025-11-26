@@ -1,22 +1,17 @@
 import { NextResponse } from "next/server";
-import { getServices } from "@/lib/data";
-import { promises as fs } from "fs";
-import path from "path";
+import { createClient } from '@supabase/supabase-js';
 
-const dataDir = path.join(process.cwd(), "data");
-const servicesFilePath = path.join(dataDir, "services.json");
+// Service role clientを使ってRLSをバイパス
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-async function ensureDataDir() {
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-async function saveServices(services: any[]) {
-  await ensureDataDir();
-  await fs.writeFile(servicesFilePath, JSON.stringify(services, null, 2), "utf8");
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }
 
 export async function GET(
@@ -24,17 +19,22 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const services = await getServices();
-    const item = services.find((s) => s.id === params.id);
+    const supabase = getSupabaseAdmin();
     
-    if (!item) {
+    const { data: service, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    
+    if (error || !service) {
       return NextResponse.json(
         { error: "Service not found" },
         { status: 404 }
       );
     }
     
-    return NextResponse.json(item);
+    return NextResponse.json(service);
   } catch (error) {
     console.error("Failed to get service:", error);
     return NextResponse.json(
@@ -50,23 +50,43 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const services = await getServices();
-    const index = services.findIndex((s) => s.id === params.id);
+    const supabase = getSupabaseAdmin();
     
-    if (index === -1) {
-      return NextResponse.json(
-        { error: "Service not found" },
-        { status: 404 }
-      );
+    // tagsを除外してslugを生成
+    const { tags, ...dbService } = body;
+    let updateData = dbService;
+    
+    if (dbService.title) {
+      let slug = dbService.title
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .substring(0, 100);
+      
+      // If slug is empty (e.g., Japanese title), use timestamp-based slug
+      if (!slug || slug.length === 0) {
+        slug = `service-${Date.now()}`;
+      }
+      
+      updateData = {
+        ...dbService,
+        slug,
+      };
     }
     
-    services[index] = {
-      ...body,
-      id: params.id,
-    };
+    const { data: updatedService, error } = await supabase
+      .from('services')
+      .update(updateData)
+      .eq('id', params.id)
+      .select()
+      .single();
     
-    await saveServices(services);
-    return NextResponse.json(services[index]);
+    if (error) {
+      console.error('Error updating service:', error);
+      throw error;
+    }
+    
+    return NextResponse.json(updatedService);
   } catch (error) {
     console.error("Failed to update service:", error);
     return NextResponse.json(
@@ -81,17 +101,21 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const services = await getServices();
-    const filtered = services.filter((s) => s.id !== params.id);
+    const supabase = getSupabaseAdmin();
     
-    if (filtered.length === services.length) {
-      return NextResponse.json(
-        { error: "Service not found" },
-        { status: 404 }
-      );
+    console.log('Attempting to delete service with ID:', params.id);
+    
+    const { error } = await supabase
+      .from('services')
+      .delete()
+      .eq('id', params.id);
+    
+    if (error) {
+      console.error('Supabase delete error:', error);
+      throw error;
     }
     
-    await saveServices(filtered);
+    console.log('Service deleted successfully:', params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete service:", error);
@@ -101,6 +125,3 @@ export async function DELETE(
     );
   }
 }
-
-
-

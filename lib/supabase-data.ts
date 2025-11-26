@@ -85,11 +85,16 @@ export async function getNewsById(id: string): Promise<NewsItem | null> {
 
 export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> {
   // Generate slug from title
-  const slug = news.title
+  let slug = news.title
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^\w\-]+/g, '')
     .substring(0, 100);
+
+  // If slug is empty (e.g., Japanese title), use timestamp-based slug
+  if (!slug || slug.length === 0) {
+    slug = `news-${Date.now()}`;
+  }
 
   // Prepare data for database (remove tags as it's not in DB schema)
   const { tags, ...dbNews } = news;
@@ -101,7 +106,7 @@ export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> 
     published_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase
+  const { data: newNews, error } = await supabase
     .from('news')
     .insert([newsData])
     .select()
@@ -112,7 +117,27 @@ export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> 
     throw error;
   }
 
-  return data;
+  // タグの紐付けを作成（categoryをタグとして使用）
+  if (newNews && news.category) {
+    // カテゴリに対応するタグを検索
+    const { data: tagData } = await supabase
+      .from('news_tags')
+      .select('id')
+      .eq('name', news.category)
+      .single();
+
+    if (tagData) {
+      // news_tag_relationsに紐付けを作成
+      await supabase
+        .from('news_tag_relations')
+        .insert({
+          news_id: newNews.id,
+          tag_id: tagData.id
+        });
+    }
+  }
+
+  return newNews;
 }
 
 export async function updateNews(id: string, news: Partial<NewsItem>): Promise<NewsItem> {
@@ -120,18 +145,26 @@ export async function updateNews(id: string, news: Partial<NewsItem>): Promise<N
   const { tags, ...dbNews } = news;
   
   // Generate slug from title if title is being updated
-  const updateData = dbNews.title
-    ? {
-        ...dbNews,
-        slug: dbNews.title
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^\w\-]+/g, '')
-          .substring(0, 100),
-      }
-    : dbNews;
+  let updateData = dbNews;
+  if (dbNews.title) {
+    let slug = dbNews.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .substring(0, 100);
+    
+    // If slug is empty (e.g., Japanese title), use timestamp-based slug
+    if (!slug || slug.length === 0) {
+      slug = `news-${Date.now()}`;
+    }
+    
+    updateData = {
+      ...dbNews,
+      slug,
+    };
+  }
 
-  const { data, error } = await supabase
+  const { data: updatedNews, error } = await supabase
     .from('news')
     .update(updateData)
     .eq('id', id)
@@ -143,7 +176,33 @@ export async function updateNews(id: string, news: Partial<NewsItem>): Promise<N
     throw error;
   }
 
-  return data;
+  // カテゴリが変更された場合、タグの紐付けを更新
+  if (updatedNews && news.category) {
+    // 既存の紐付けを削除
+    await supabase
+      .from('news_tag_relations')
+      .delete()
+      .eq('news_id', id);
+
+    // カテゴリに対応するタグを検索
+    const { data: tagData } = await supabase
+      .from('news_tags')
+      .select('id')
+      .eq('name', news.category)
+      .single();
+
+    if (tagData) {
+      // 新しい紐付けを作成
+      await supabase
+        .from('news_tag_relations')
+        .insert({
+          news_id: id,
+          tag_id: tagData.id
+        });
+    }
+  }
+
+  return updatedNews;
 }
 
 export async function deleteNews(id: string): Promise<void> {

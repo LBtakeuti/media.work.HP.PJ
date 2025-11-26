@@ -1,37 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getContacts, updateContactStatus } from "@/lib/supabase-data";
+import { createClient } from '@supabase/supabase-js';
+
+// Service role clientを使ってRLSをバイパス
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 export async function GET() {
   try {
-    const contacts = await getContacts();
-    return NextResponse.json(contacts);
+    const supabase = getSupabaseAdmin();
+    
+    const { data: contacts, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching contacts:', error);
+      throw error;
+    }
+
+    return NextResponse.json(contacts || []);
   } catch (error) {
     console.error("Error fetching contacts:", error);
     return NextResponse.json(
       { error: "お問い合わせの取得に失敗しました" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { id, status } = body;
-
-    if (!id || !status) {
-      return NextResponse.json(
-        { error: "IDとステータスが必要です" },
-        { status: 400 }
-      );
-    }
-
-    const updatedContact = await updateContactStatus(id, status);
-    return NextResponse.json(updatedContact);
-  } catch (error) {
-    console.error("Error updating contact status:", error);
-    return NextResponse.json(
-      { error: "ステータスの更新に失敗しました" },
       { status: 500 }
     );
   }

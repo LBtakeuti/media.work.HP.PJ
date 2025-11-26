@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ServiceItem } from "@/lib/data";
+import { ServiceItem } from "@/lib/supabase-data";
 import dynamic from "next/dynamic";
 import ImageSelector from "@/components/admin/ImageSelector";
 

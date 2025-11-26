@@ -1,4 +1,4 @@
-import { getServiceById } from "@/lib/data";
+import { getServiceById } from "@/lib/supabase-data";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -59,12 +59,12 @@ export default async function ServiceDetailPage({
 
         {/* Main Image */}
         {service.image && (
-          <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
+          <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden bg-gray-100">
             <Image
               src={service.image}
               alt={service.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>

@@ -43,12 +43,17 @@ export async function POST(request: Request) {
     const body = await request.json();
     const supabase = getSupabaseAdmin();
     
-    // Generate slug from title
-    const slug = body.title
+    // Generate slug from title or use timestamp as fallback
+    let slug = body.title
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w\-]+/g, '')
       .substring(0, 100);
+    
+    // If slug is empty (e.g., Japanese title), use timestamp-based slug
+    if (!slug || slug.length === 0) {
+      slug = `news-${Date.now()}`;
+    }
 
     // Prepare data for database (remove tags as it's not in DB schema)
     const { tags, ...dbNews } = body;

@@ -54,16 +54,25 @@ export async function PUT(
     
     // tagsを除外してslugを生成
     const { tags, ...dbNews } = body;
-    const updateData = dbNews.title
-      ? {
-          ...dbNews,
-          slug: dbNews.title
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w\-]+/g, '')
-            .substring(0, 100),
-        }
-      : dbNews;
+    let updateData = dbNews;
+    
+    if (dbNews.title) {
+      let slug = dbNews.title
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .substring(0, 100);
+      
+      // If slug is empty (e.g., Japanese title), use timestamp-based slug
+      if (!slug || slug.length === 0) {
+        slug = `news-${Date.now()}`;
+      }
+      
+      updateData = {
+        ...dbNews,
+        slug,
+      };
+    }
     
     const { data: updatedNews, error } = await supabase
       .from('news')

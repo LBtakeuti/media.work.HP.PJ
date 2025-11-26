@@ -23,12 +23,12 @@ export default function ServiceCard({
   const CardContent = (
     <>
       {/* Image/Visual Section */}
-      <div className="relative h-56 bg-gray-50 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 overflow-hidden rounded-t-lg">
+      <div className="relative h-56 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 overflow-hidden rounded-t-lg">
         <Image
           src={imageSrc}
           alt={imageAlt || title}
           fill
-          className="object-cover"
+          className="object-contain"
         />
         {/* Overlay for hover effect */}
         <div className="absolute inset-0 bg-[#E6E6E6] opacity-0 group-hover:opacity-30 group-active:opacity-30 transition-opacity duration-200"></div>

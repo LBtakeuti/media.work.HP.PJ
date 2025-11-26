@@ -1,4 +1,4 @@
-import { getNewsById } from "@/lib/data";
+import { getNewsById } from "@/lib/supabase-data";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -64,12 +64,12 @@ export default async function NewsDetailPage({
 
         {/* Main Image */}
         {news.image && (
-          <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
+          <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden bg-gray-100">
             <Image
               src={news.image}
               alt={news.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>

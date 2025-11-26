@@ -15,12 +15,12 @@ export default function NewsCard({ item }: NewsCardProps) {
       className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow border border-gray-100 group"
     >
       {/* Image Section */}
-      <div className="relative h-56 bg-gray-50">
+      <div className="relative h-56 bg-gray-100">
         <Image
           src={item.image || "/sevilla-tower-g8a5d080a4_640.jpg"}
           alt={item.title}
           fill
-          className="object-cover"
+          className="object-contain"
         />
       </div>
       

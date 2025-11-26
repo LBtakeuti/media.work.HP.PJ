@@ -1,4 +1,4 @@
-import { getNews } from "@/lib/data";
+import { getNews } from "@/lib/supabase-data";
 import NewsCard from "@/components/NewsCard";
 import Image from "next/image";
 import type { Metadata } from "next";

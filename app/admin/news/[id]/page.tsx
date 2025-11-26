@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { NewsItem } from "@/lib/data";
+import { NewsItem } from "@/lib/supabase-data";
 
 interface NewsForm {
   title: string;
