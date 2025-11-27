@@ -803,3 +803,113 @@ export async function deleteContact(id: string): Promise<void> {
     throw error;
   }
 }
+
+// ============================================
+// ポートフォリオ関連
+// ============================================
+
+export interface PortfolioItem {
+  id: string;
+  title: string;
+  description?: string;
+  youtube_url: string;
+  sort_order?: number;
+  published?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getPortfolios(): Promise<PortfolioItem[]> {
+  noStore();
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching portfolios:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getPublishedPortfolios(): Promise<PortfolioItem[]> {
+  noStore();
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select('*')
+    .eq('published', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching published portfolios:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getPortfolioById(id: string): Promise<PortfolioItem | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching portfolio by id:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function createPortfolio(portfolio: Omit<PortfolioItem, 'id' | 'created_at' | 'updated_at'>): Promise<PortfolioItem> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolios')
+    .insert([portfolio])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating portfolio:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updatePortfolio(id: string, portfolio: Partial<PortfolioItem>): Promise<PortfolioItem> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolios')
+    .update(portfolio)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating portfolio:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deletePortfolio(id: string): Promise<void> {
+  const supabase = getSupabase();
+  const { error } = await supabase
+    .from('portfolios')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting portfolio:', error);
+    throw error;
+  }
+}

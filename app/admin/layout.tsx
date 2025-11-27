@@ -93,6 +93,7 @@ export default function AdminLayout({
     { href: "/admin", label: "ダッシュボード" },
     { href: "/admin/news", label: "ニュース管理" },
     { href: "/admin/services", label: "サービス管理" },
+    { href: "/admin/portfolio", label: "ポートフォリオ管理" },
     { href: "/admin/contacts", label: "お問い合わせ" },
     { href: "/admin/categories/news", label: "ニュースカテゴリ" },
     { href: "/admin/categories/services", label: "サービスカテゴリ" },
