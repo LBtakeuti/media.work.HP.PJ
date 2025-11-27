@@ -173,11 +173,11 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="flex items-start gap-3 cursor-pointer">
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     {...register("privacyPolicy", { required: "プライバシーポリシーに同意してください" })}
-                    className="mt-1 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">
                     <a
