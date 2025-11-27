@@ -581,6 +581,7 @@ export async function getServiceById(id: string): Promise<ServiceItem | null> {
 }
 
 export async function getServiceBySlug(slug: string): Promise<ServiceItem | null> {
+  noStore(); // キャッシュを無効化
   const supabase = getSupabase();
 
   // まずslugで検索
