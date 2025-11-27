@@ -1,4 +1,5 @@
 import { getPublishedPortfolios } from "@/lib/supabase-data";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,17 @@ export default async function PortfolioPage() {
     <div className="bg-white">
       {/* Page Header */}
       <section className="relative bg-gradient-to-br from-primary-50 to-primary-100 py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800 z-0"></div>
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/video-g07e4aeb6d_640.jpg"
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            quality={90}
+          />
+        </div>
         <div className="absolute inset-0 bg-black/40 z-[1]"></div>
 
         <div className="relative z-10 h-full flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
