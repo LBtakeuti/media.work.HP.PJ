@@ -10,6 +10,7 @@ interface ContactForm {
   email: string;
   subject: string;
   message: string;
+  privacyPolicy: boolean;
 }
 
 export default function ContactPage() {
@@ -168,6 +169,30 @@ export default function ContactPage() {
                 />
                 {errors.message && (
                   <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...register("privacyPolicy", { required: "プライバシーポリシーに同意してください" })}
+                    className="mt-1 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <a
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-600 hover:underline"
+                    >
+                      プライバシーポリシー
+                    </a>
+                    に同意する <span className="text-red-500">*</span>
+                  </span>
+                </label>
+                {errors.privacyPolicy && (
+                  <p className="mt-1 text-sm text-red-600">{errors.privacyPolicy.message}</p>
                 )}
               </div>
 
