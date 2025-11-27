@@ -582,9 +582,9 @@ export async function getServiceById(id: string): Promise<ServiceItem | null> {
 
 export async function getServiceBySlug(slug: string): Promise<ServiceItem | null> {
   const supabase = getSupabase();
-  
-  // JOINクエリで一度に取得
-  const { data, error } = await supabase
+
+  // まずslugで検索
+  let { data, error } = await supabase
     .from('services')
     .select(`
       *,
@@ -597,8 +597,27 @@ export async function getServiceBySlug(slug: string): Promise<ServiceItem | null
     .eq('slug', slug)
     .single();
 
-  if (error) {
-    console.error('Error fetching service by slug:', error);
+  // slugで見つからない場合はIDで検索
+  if (error || !data) {
+    const result = await supabase
+      .from('services')
+      .select(`
+        *,
+        service_category_relations (
+          service_categories (
+            name
+          )
+        )
+      `)
+      .eq('id', slug)
+      .single();
+
+    data = result.data;
+    error = result.error;
+  }
+
+  if (error || !data) {
+    console.error('Error fetching service by slug or id:', error);
     return null;
   }
 
