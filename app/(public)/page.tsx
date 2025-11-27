@@ -100,9 +100,20 @@ export default async function Home() {
       {/* Services Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
-            サービス
-          </h2>
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              サービス
+            </h2>
+            <Link
+              href="/services"
+              className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
+            >
+              もっと見る
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {topServices.map((service) => (
               <ServiceCard
@@ -123,9 +134,20 @@ export default async function Home() {
       {/* News Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
-            ニュース
-          </h2>
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              ニュース
+            </h2>
+            <Link
+              href="/news"
+              className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
+            >
+              もっと見る
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {latestNews.map((item) => (
               <NewsCard key={item.id} item={item} />
