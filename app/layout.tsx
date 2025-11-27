@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     siteName: "株式会社メディア・ワーク",
     images: [
       {
-        url: "/logo.jpg",
-        width: 1200,
-        height: 630,
+        url: "/ogp-image.png",
+        width: 928,
+        height: 761,
         alt: "株式会社メディア・ワーク",
       },
     ],
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "株式会社メディア・ワーク",
     description: "1975年創業、東京の印刷製版会社から進化したメディア制作のプロ集団。組版・グラフィックデザインからAI動画撮影サービスSAVREQ、Web制作まで、企画から運営までワンストップでサポート。伝統と革新を融合し、心に残る瞬間を未来へ届けます。",
-    images: ["/logo.jpg"],
+    images: ["/ogp-image.png"],
   },
 };
 

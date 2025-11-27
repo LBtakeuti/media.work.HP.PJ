@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "会社情報 | 株式会社メディア・ワーク",
     description: "株式会社メディア・ワークの会社概要、企業理念、沿革などをご紹介します。",
-    images: ["/logo.jpg"],
+    images: ["/ogp-image.png"],
   },
 };
 

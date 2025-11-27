@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ニュース | 株式会社メディア・ワーク",
     description: "株式会社メディア・ワークの最新ニュース、お知らせをご紹介します。",
-    images: ["/logo.jpg"],
+    images: ["/ogp-image.png"],
   },
 };
 
