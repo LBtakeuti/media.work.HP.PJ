@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { revalidatePath } from "next/cache";
 
 export async function GET(
   request: Request,
@@ -98,7 +99,12 @@ export async function PUT(
         }
       }
     }
-    
+
+    // キャッシュを無効化
+    revalidatePath('/');
+    revalidatePath('/services');
+    revalidatePath(`/services/${updatedService.slug}`);
+
     return NextResponse.json({ ...updatedService, categories: categories || [] });
   } catch (error: any) {
     console.error("Failed to update service:", error);
@@ -115,17 +121,21 @@ export async function DELETE(
 ) {
   try {
     const supabase = getSupabaseAdmin();
-    
+
     const { error } = await supabase
       .from('services')
       .delete()
       .eq('id', params.id);
-    
+
     if (error) {
       console.error('Supabase delete error:', error);
       throw error;
     }
-    
+
+    // キャッシュを無効化
+    revalidatePath('/');
+    revalidatePath('/services');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete service:", error);

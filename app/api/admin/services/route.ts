@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
   try {
@@ -111,6 +112,10 @@ export async function POST(request: Request) {
           .insert(relations);
       }
     }
+
+    // キャッシュを無効化
+    revalidatePath('/');
+    revalidatePath('/services');
 
     return NextResponse.json({ ...newService, categories: categories || [] });
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
 
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -151,6 +152,10 @@ export async function POST(request: Request) {
           .insert(relations);
       }
     }
+
+    // キャッシュを無効化
+    revalidatePath('/');
+    revalidatePath('/news');
 
     return NextResponse.json({ ...newNews, categories: categories || [] });
   } catch (error) {

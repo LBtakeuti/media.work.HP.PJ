@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from './supabase-admin';
+import { unstable_noStore as noStore } from 'next/cache';
 
 // サーバーサイドでのデータ取得にはサービスロールキーを使用
 // （RLSをバイパスして全てのデータにアクセス可能）
@@ -67,6 +68,7 @@ export interface Category {
 // ============================================
 
 export async function getNewsCategories(): Promise<Category[]> {
+  noStore(); // キャッシュを無効化
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('news_categories')
@@ -132,6 +134,7 @@ export async function deleteNewsCategory(id: string): Promise<void> {
 // ============================================
 
 export async function getServiceCategories(): Promise<Category[]> {
+  noStore(); // キャッシュを無効化
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('service_categories')
@@ -197,8 +200,9 @@ export async function deleteServiceCategory(id: string): Promise<void> {
 // ============================================
 
 export async function getNews(): Promise<NewsItem[]> {
+  noStore(); // キャッシュを無効化
   const supabase = getSupabase();
-  
+
   // JOINクエリで一度に全データを取得（N+1問題を解消）
   const { data, error } = await supabase
     .from('news')
@@ -222,7 +226,7 @@ export async function getNews(): Promise<NewsItem[]> {
     const categories = item.news_category_relations
       ?.map((rel: any) => rel.news_categories?.name)
       .filter(Boolean) || [];
-    
+
     const { news_category_relations, ...newsItem } = item;
     return {
       ...newsItem,
@@ -468,8 +472,9 @@ export async function deleteNews(id: string): Promise<void> {
 // ============================================
 
 export async function getServices(): Promise<ServiceItem[]> {
+  noStore(); // キャッシュを無効化
   const supabase = getSupabase();
-  
+
   // JOINクエリで一度に全データを取得（N+1問題を解消）
   const { data, error } = await supabase
     .from('services')
@@ -493,7 +498,7 @@ export async function getServices(): Promise<ServiceItem[]> {
     const categories = item.service_category_relations
       ?.map((rel: any) => rel.service_categories?.name)
       .filter(Boolean) || [];
-    
+
     const { service_category_relations, ...serviceItem } = item;
     return {
       ...serviceItem,

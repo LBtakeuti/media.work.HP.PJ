@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
 
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -118,7 +119,12 @@ export async function PUT(
         }
       }
     }
-    
+
+    // キャッシュを無効化
+    revalidatePath('/');
+    revalidatePath('/news');
+    revalidatePath(`/news/${updatedNews.slug}`);
+
     return NextResponse.json({ ...updatedNews, categories: categories || [] });
   } catch (error) {
     console.error("Failed to update news:", error);
@@ -135,18 +141,22 @@ export async function DELETE(
 ) {
   try {
     const supabase = getSupabase();
-    
+
     // カテゴリリレーションはCASCADEで自動削除される
     const { error } = await supabase
       .from('news')
       .delete()
       .eq('id', params.id);
-    
+
     if (error) {
       console.error('Supabase delete error:', error);
       throw error;
     }
-    
+
+    // キャッシュを無効化
+    revalidatePath('/');
+    revalidatePath('/news');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete news:", error);
