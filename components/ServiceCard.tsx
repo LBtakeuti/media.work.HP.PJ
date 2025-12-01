@@ -51,28 +51,31 @@ export default function ServiceCard({
         <div className="absolute inset-0 bg-[#E6E6E6] opacity-0 group-hover:opacity-30 group-active:opacity-30 transition-opacity duration-200"></div>
       </div>
 
-      {/* Content Section - flex-grow to fill remaining space */}
-      <div className={`${isSmall ? 'p-3' : 'p-5'} flex-grow flex flex-col bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200`}>
+      {/* Content Section - fixed height */}
+      <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 overflow-hidden`}>
         {(date || (categories && categories.length > 0)) && (
-          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex flex-wrap items-center gap-2`}>
+          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} truncate flex-shrink-0`}>
             {date && <span>{date}</span>}
-            {date && categories && categories.length > 0 && <span>|</span>}
+            {date && categories && categories.length > 0 && <span> | </span>}
             {categories && categories.length > 0 && (
               <span>{categories.join(", ")}</span>
             )}
           </div>
         )}
-        <h3 className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight`}>
+        <h3
+          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight line-clamp-1 flex-shrink-0`}
+          title={title}
+        >
           {title}
         </h3>
         {description && !isSmall && (
-          <p className="text-sm text-gray-700 leading-relaxed mb-4">
+          <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 flex-shrink-0">
             {description}
           </p>
         )}
         {/* Spacer to push arrow to bottom */}
         <div className="flex-grow"></div>
-        <div className="flex justify-end">
+        <div className="flex justify-end flex-shrink-0">
           <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
