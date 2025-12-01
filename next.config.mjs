@@ -3,7 +3,13 @@ const nextConfig = {
   // 画像最適化の設定
   images: {
     // リモート画像のドメインを許可（必要に応じて追加）
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'qazyoxligvjsasfqettg.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
     // 画像フォーマットの最適化
     formats: ['image/avif', 'image/webp'],
   },

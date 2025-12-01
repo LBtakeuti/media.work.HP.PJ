@@ -10,6 +10,7 @@ export default function AdminNewsPage() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
 
   useEffect(() => {
     loadNews();
@@ -22,11 +23,11 @@ export default function AdminNewsPage() {
       setError(null);
       const response = await fetch("/api/admin/news");
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || "ニュースの取得に失敗しました");
       }
-      
+
       // 配列であることを確認
       if (Array.isArray(data)) {
         setNews(data);
@@ -64,6 +65,45 @@ export default function AdminNewsPage() {
     } catch (error) {
       console.error("Failed to delete news:", error);
       alert("削除に失敗しました");
+    }
+  };
+
+  const handleMove = async (index: number, direction: "up" | "down") => {
+    if (isReordering) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= news.length) return;
+
+    setIsReordering(true);
+
+    // ローカルで順序を入れ替え
+    const newNews = [...news];
+    [newNews[index], newNews[newIndex]] = [newNews[newIndex], newNews[index]];
+
+    // sort_orderを更新
+    const updatedItems = newNews.map((item, i) => ({
+      id: item.id,
+      sort_order: i,
+    }));
+
+    setNews(newNews);
+
+    try {
+      const response = await fetch("/api/admin/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ table: "news", items: updatedItems }),
+      });
+
+      if (!response.ok) {
+        throw new Error("順序の更新に失敗しました");
+      }
+    } catch (error) {
+      console.error("Failed to reorder:", error);
+      alert("順序の更新に失敗しました");
+      await loadNews(); // エラー時は再読み込み
+    } finally {
+      setIsReordering(false);
     }
   };
 
@@ -121,6 +161,9 @@ export default function AdminNewsPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                  順序
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   タイトル
                 </th>
@@ -136,8 +179,32 @@ export default function AdminNewsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {news.map((item) => (
+              {news.map((item, index) => (
                 <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleMove(index, "up")}
+                        disabled={index === 0 || isReordering}
+                        className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="上へ移動"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleMove(index, "down")}
+                        disabled={index === news.length - 1 || isReordering}
+                        className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="下へ移動"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
                       {item.title}

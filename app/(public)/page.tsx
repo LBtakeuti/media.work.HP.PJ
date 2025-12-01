@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getNews, getServices } from "@/lib/supabase-data";
-import NewsCard from "@/components/NewsCard";
+import SmallNewsCard from "@/components/SmallNewsCard";
 import ServiceCard from "@/components/ServiceCard";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 import AnimatedTitle from "@/components/AnimatedTitle";
+import AnimatedSectionTitle from "@/components/AnimatedSectionTitle";
 import type { Metadata } from "next";
 
 // キャッシュを無効化し、毎回最新データを取得
@@ -23,9 +24,8 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const newsItems = await getNews();
-  const latestNews = newsItems.slice(0, 3); // 最新3件を表示
+  const latestNews = newsItems.slice(0, 4); // 最新4件を表示
   const services = await getServices();
-  const topServices = services.slice(0, 3); // 最初の3件を表示
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -75,7 +75,7 @@ export default async function Home() {
           <h2 className="text-[18px] font-semibold text-gray-900 mb-6 text-center">
             心に残る瞬間を、未来へ届ける。メディア戦略のプロフェッショナル集団
           </h2>
-          <div className="space-y-4 text-[15px] md:text-[14px] text-gray-700 leading-relaxed">
+          <div className="space-y-4 text-[15px] md:text-[14px] text-gray-700 leading-relaxed text-center">
             <p>
               イベントの感動を、パーソナライズされた映像で永遠に。
             </p>
@@ -98,12 +98,12 @@ export default async function Home() {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 bg-white">
+      <section className="pt-20 pb-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <AnimatedSectionTitle className="text-3xl md:text-4xl font-bold text-[#1e3a5f]">
               サービス
-            </h2>
+            </AnimatedSectionTitle>
             <Link
               href="/services"
               className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
@@ -114,30 +114,80 @@ export default async function Home() {
               </svg>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {topServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                title={service.title}
-                description={service.description}
-                categories={service.categories}
-                imageSrc={service.image}
-                imageAlt={service.title}
-                href={`/services/${service.slug || service.id}`}
-                imageDisplayMode={service.image_display_mode}
-              />
-            ))}
-          </div>
+          {(() => {
+            const fullRows = Math.floor(services.length / 4);
+            const remainder = services.length % 4;
+            const topServices = services.slice(0, fullRows * 4);
+            const bottomServices = services.slice(fullRows * 4);
+
+            return (
+              <>
+                {/* 上段: 4列グリッド */}
+                {topServices.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {topServices.map((service) => (
+                      <ServiceCard
+                        key={service.id}
+                        title={service.title}
+                        categories={service.categories}
+                        imageSrc={service.image}
+                        imageAlt={service.title}
+                        href={`/services/${service.slug || service.id}`}
+                        imageDisplayMode={service.image_display_mode}
+                        size="small"
+                      />
+                    ))}
+                  </div>
+                )}
+                {/* 下段: 中央揃え（上段と同じコンポーネントとスタイル） */}
+                {bottomServices.length > 0 && (
+                  <>
+                    {/* モバイル: 2列グリッド */}
+                    <div className="grid grid-cols-2 gap-4 mt-4 md:hidden">
+                      {bottomServices.map((service) => (
+                        <ServiceCard
+                          key={service.id}
+                          title={service.title}
+                          categories={service.categories}
+                          imageSrc={service.image}
+                          imageAlt={service.title}
+                          href={`/services/${service.slug || service.id}`}
+                          imageDisplayMode={service.image_display_mode}
+                          size="small"
+                        />
+                      ))}
+                    </div>
+                    {/* PC: flexboxで中央揃え */}
+                    <div className="hidden md:flex justify-center items-start gap-4 mt-4">
+                      {bottomServices.map((service) => (
+                        <ServiceCard
+                          key={service.id}
+                          title={service.title}
+                          categories={service.categories}
+                          imageSrc={service.image}
+                          imageAlt={service.title}
+                          href={`/services/${service.slug || service.id}`}
+                          imageDisplayMode={service.image_display_mode}
+                          size="small"
+                          className="flex-shrink-0 w-[calc(25%-12px)]"
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 
       {/* News Section */}
-      <section className="py-20 bg-white">
+      <section className="pt-8 pb-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <AnimatedSectionTitle className="text-3xl md:text-4xl font-bold text-[#1e3a5f]">
               ニュース
-            </h2>
+            </AnimatedSectionTitle>
             <Link
               href="/news"
               className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
@@ -148,9 +198,9 @@ export default async function Home() {
               </svg>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {latestNews.map((item) => (
-              <NewsCard key={item.id} item={item} />
+              <SmallNewsCard key={item.id} item={item} />
             ))}
           </div>
         </div>

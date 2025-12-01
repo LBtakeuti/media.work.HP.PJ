@@ -214,7 +214,7 @@ export async function getNews(): Promise<NewsItem[]> {
         )
       )
     `)
-    .order('updated_at', { ascending: false });
+    .order('sort_order', { ascending: true });
 
   if (error) {
     console.error('Error fetching news:', error);
@@ -828,15 +828,29 @@ export async function deleteContact(id: string): Promise<void> {
 // ポートフォリオ関連
 // ============================================
 
+export interface PortfolioCategory {
+  id: string;
+  name: string;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface PortfolioItem {
   id: string;
   title: string;
   description?: string;
-  youtube_url: string;
+  youtube_url?: string;
   sort_order?: number;
   published?: boolean;
   created_at?: string;
   updated_at?: string;
+  display_type?: 'youtube' | 'gallery';
+  category_id?: string;
+  category?: PortfolioCategory;
+  images?: string[];
+  reference_url?: string;
+  image_display_mode?: 'contain' | 'cover';
 }
 
 export async function getPortfolios(): Promise<PortfolioItem[]> {
@@ -844,7 +858,12 @@ export async function getPortfolios(): Promise<PortfolioItem[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('portfolios')
-    .select('*')
+    .select(`
+      *,
+      portfolio_category_relations (
+        category:portfolio_categories (*)
+      )
+    `)
     .order('sort_order', { ascending: true });
 
   if (error) {
@@ -852,7 +871,20 @@ export async function getPortfolios(): Promise<PortfolioItem[]> {
     throw error;
   }
 
-  return data || [];
+  // リレーションからカテゴリを抽出して整形
+  const portfolios = (data || []).map((item: any) => {
+    const relation = item.portfolio_category_relations?.[0];
+    const category = relation?.category || null;
+    // portfolio_category_relations を除外して、category を追加
+    const { portfolio_category_relations, ...rest } = item;
+    return {
+      ...rest,
+      category,
+      category_id: category?.id || null,
+    };
+  });
+
+  return portfolios;
 }
 
 export async function getPublishedPortfolios(): Promise<PortfolioItem[]> {
@@ -860,7 +892,12 @@ export async function getPublishedPortfolios(): Promise<PortfolioItem[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('portfolios')
-    .select('*')
+    .select(`
+      *,
+      portfolio_category_relations (
+        category:portfolio_categories (*)
+      )
+    `)
     .eq('published', true)
     .order('sort_order', { ascending: true });
 
@@ -869,14 +906,31 @@ export async function getPublishedPortfolios(): Promise<PortfolioItem[]> {
     throw error;
   }
 
-  return data || [];
+  // リレーションからカテゴリを抽出して整形
+  const portfolios = (data || []).map((item: any) => {
+    const relation = item.portfolio_category_relations?.[0];
+    const category = relation?.category || null;
+    const { portfolio_category_relations, ...rest } = item;
+    return {
+      ...rest,
+      category,
+      category_id: category?.id || null,
+    };
+  });
+
+  return portfolios;
 }
 
 export async function getPortfolioById(id: string): Promise<PortfolioItem | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('portfolios')
-    .select('*')
+    .select(`
+      *,
+      portfolio_category_relations (
+        category:portfolio_categories (*)
+      )
+    `)
     .eq('id', id)
     .single();
 
@@ -885,7 +939,16 @@ export async function getPortfolioById(id: string): Promise<PortfolioItem | null
     return null;
   }
 
-  return data;
+  // リレーションからカテゴリを抽出して整形
+  const relation = (data as any)?.portfolio_category_relations?.[0];
+  const category = relation?.category || null;
+  const { portfolio_category_relations, ...rest } = data as any;
+
+  return {
+    ...rest,
+    category,
+    category_id: category?.id || null,
+  };
 }
 
 export async function createPortfolio(portfolio: Omit<PortfolioItem, 'id' | 'created_at' | 'updated_at'>): Promise<PortfolioItem> {
@@ -930,6 +993,84 @@ export async function deletePortfolio(id: string): Promise<void> {
 
   if (error) {
     console.error('Error deleting portfolio:', error);
+    throw error;
+  }
+}
+
+export async function getPortfolioCategories(): Promise<PortfolioCategory[]> {
+  noStore();
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolio_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching portfolio categories:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function getPortfolioCategoryById(id: string): Promise<PortfolioCategory | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolio_categories')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching portfolio category by id:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function createPortfolioCategory(category: Omit<PortfolioCategory, 'id' | 'created_at' | 'updated_at'>): Promise<PortfolioCategory> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolio_categories')
+    .insert([category])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating portfolio category:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updatePortfolioCategory(id: string, category: Partial<PortfolioCategory>): Promise<PortfolioCategory> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('portfolio_categories')
+    .update(category)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating portfolio category:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deletePortfolioCategory(id: string): Promise<void> {
+  const supabase = getSupabase();
+  const { error } = await supabase
+    .from('portfolio_categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting portfolio category:', error);
     throw error;
   }
 }

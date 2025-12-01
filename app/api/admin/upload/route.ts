@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
+
+const BUCKET_NAME = "uploads";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,31 +34,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // アップロードディレクトリの作成
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
-      // ディレクトリが既に存在する場合は無視
-    }
+    const supabase = getSupabaseAdmin();
 
     // ファイル名の生成（UUID + 元の拡張子）
-    const fileExtension = path.extname(file.name);
-    const fileName = `${randomUUID()}${fileExtension}`;
-    const filePath = path.join(uploadsDir, fileName);
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const fileName = `${randomUUID()}.${fileExtension}`;
+    const filePath = `content/${fileName}`;
 
-    // ファイルの保存
+    // ファイルをArrayBufferに変換
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    // 公開URLを返す
-    const publicUrl = `/uploads/${fileName}`;
+    // Supabase Storageにアップロード
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error("Supabase Storage error:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      
+      // バケットが存在しない場合のエラーメッセージ
+      if (error.message?.includes('Bucket not found') || error.message?.includes('not found')) {
+        return NextResponse.json(
+          { error: `ストレージバケット「${BUCKET_NAME}」が存在しません。Supabaseダッシュボードでバケットを作成してください。` },
+          { status: 500 }
+        );
+      }
+      
+      return NextResponse.json(
+        { error: `アップロードに失敗しました: ${error.message || 'Unknown error'}` },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
+      console.error("Upload succeeded but no data returned");
+      return NextResponse.json(
+        { error: "アップロードに失敗しました: データが返されませんでした" },
+        { status: 500 }
+      );
+    }
+
+    // 公開URLを取得
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
 
     return NextResponse.json(
       {
         success: true,
-        url: publicUrl,
+        url: publicUrlData.publicUrl,
         fileName: fileName,
       },
       { status: 200 }

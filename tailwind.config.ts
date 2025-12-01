@@ -21,6 +21,11 @@ const config: Config = {
           800: "#075985",
           900: "#0c4a6e",
         },
+        navy: {
+          300: "#6b7db3",
+          400: "#4a5d99",
+          500: "#2e3a5f",
+        },
         brand: "hsl(var(--brand))",
         "brand-foreground": "hsl(var(--brand-foreground))",
       },

@@ -10,6 +10,8 @@ interface ServiceCardProps {
   imageAlt?: string;
   href?: string;
   imageDisplayMode?: 'contain' | 'cover';
+  size?: 'default' | 'small';
+  className?: string;
 }
 
 export default function ServiceCard({
@@ -21,11 +23,15 @@ export default function ServiceCard({
   imageAlt,
   href,
   imageDisplayMode = 'contain',
+  size = 'default',
+  className = '',
 }: ServiceCardProps) {
+  const isSmall = size === 'small';
+
   const CardContent = (
-    <>
+    <div className="flex flex-col h-full">
       {/* Image/Visual Section */}
-      <div className="relative h-56 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 overflow-hidden rounded-t-lg">
+      <div className={`relative ${isSmall ? 'h-32' : 'h-56'} flex-shrink-0 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 overflow-hidden`}>
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -36,7 +42,7 @@ export default function ServiceCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`${isSmall ? 'w-10 h-10' : 'w-16 h-16'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -44,11 +50,11 @@ export default function ServiceCard({
         {/* Overlay for hover effect */}
         <div className="absolute inset-0 bg-[#E6E6E6] opacity-0 group-hover:opacity-30 group-active:opacity-30 transition-opacity duration-200"></div>
       </div>
-      
-      {/* Content Section */}
-      <div className="p-5 bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200">
+
+      {/* Content Section - flex-grow to fill remaining space */}
+      <div className={`${isSmall ? 'p-3' : 'p-5'} flex-grow flex flex-col bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200`}>
         {(date || (categories && categories.length > 0)) && (
-          <div className="text-xs text-gray-500 mb-3 flex flex-wrap items-center gap-2">
+          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex flex-wrap items-center gap-2`}>
             {date && <span>{date}</span>}
             {date && categories && categories.length > 0 && <span>|</span>}
             {categories && categories.length > 0 && (
@@ -56,24 +62,26 @@ export default function ServiceCard({
             )}
           </div>
         )}
-        <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+        <h3 className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight`}>
           {title}
         </h3>
-        {description && (
+        {description && !isSmall && (
           <p className="text-sm text-gray-700 leading-relaxed mb-4">
             {description}
           </p>
         )}
+        {/* Spacer to push arrow to bottom */}
+        <div className="flex-grow"></div>
         <div className="flex justify-end">
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </div>
       </div>
-    </>
+    </div>
   );
 
-  const cardClassName = "group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl hover:bg-[#E6E6E6] active:bg-[#E6E6E6] active:scale-[0.98] transition-all duration-200 border border-gray-100 cursor-pointer";
+  const cardClassName = `group bg-[#E6E6E6] rounded-lg overflow-hidden shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 cursor-pointer h-full block ${className}`;
 
   if (href) {
     return (

@@ -1,8 +1,10 @@
 import { getNews, getNewsCategories } from "@/lib/supabase-data";
-import NewsCard from "@/components/NewsCard";
+import ServiceCard from "@/components/ServiceCard";
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 
 // キャッシュを無効化し、毎回最新データを取得
 export const dynamic = 'force-dynamic';
@@ -121,7 +123,17 @@ export default async function NewsPage({
               </div>
             ) : (
               newsItems.map((item) => (
-                <NewsCard key={item.id} item={item} />
+                <ServiceCard
+                  key={item.id}
+                  title={item.title}
+                  description={item.summary}
+                  date={format(new Date(item.date), "yyyy年MM月dd日", { locale: ja })}
+                  categories={item.categories}
+                  imageSrc={item.image}
+                  imageAlt={item.title}
+                  href={`/news/${item.slug || item.id}`}
+                  imageDisplayMode={item.image_display_mode}
+                />
               ))
             )}
           </div>

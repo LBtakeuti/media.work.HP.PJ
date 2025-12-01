@@ -3,9 +3,25 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+
+const navItems = [
+  { href: "/news", label: "NEWS" },
+  { href: "/company", label: "COMPANY" },
+  { href: "/services", label: "SERVICES" },
+  { href: "/portfolio", label: "PORTFOLIO" },
+  { href: "/contact", label: "CONTACT" },
+];
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // パスがアクティブかどうかをチェック
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   return (
     <header className="bg-white sticky top-0 z-[100] border-b-0">
@@ -26,36 +42,19 @@ export default function Header() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link
-              href="/news"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
-            >
-              NEWS
-            </Link>
-            <Link
-              href="/company"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
-            >
-              COMPANY
-            </Link>
-            <Link
-              href="/services"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
-            >
-              SERVICES
-            </Link>
-            <Link
-              href="/portfolio"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
-            >
-              PORTFOLIO
-            </Link>
-            <Link
-              href="/contact"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-bold transition-colors"
-            >
-              CONTACT
-            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-3 py-2 text-sm font-bold transition-colors ${
+                  isActive(item.href)
+                    ? "text-primary-600 border-b-2 border-primary-600"
+                    : "text-gray-700 hover:text-primary-600"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
 
           {/* Mobile menu button */}
@@ -95,41 +94,20 @@ export default function Header() {
           }`}
         >
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link
-                href="/news"
-                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                NEWS
-              </Link>
-              <Link
-                href="/company"
-                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                COMPANY
-              </Link>
-              <Link
-                href="/services"
-                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                SERVICES
-              </Link>
-              <Link
-                href="/portfolio"
-                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                PORTFOLIO
-              </Link>
-              <Link
-                href="/contact"
-                className="block px-3 py-2 text-base font-bold text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                CONTACT
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`block px-3 py-2 text-base font-bold rounded-md ${
+                    isActive(item.href)
+                      ? "text-primary-600 bg-primary-50"
+                      : "text-gray-700 hover:text-primary-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
           </div>
         </div>
       </div>
