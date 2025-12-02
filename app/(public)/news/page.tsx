@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import Pagination from "@/components/Pagination";
 
 // キャッシュを無効化し、毎回最新データを取得
 export const dynamic = 'force-dynamic';
@@ -19,19 +20,28 @@ export const metadata: Metadata = {
   },
 };
 
+const ITEMS_PER_PAGE = 9;
+
 export default async function NewsPage({
   searchParams,
 }: {
-  searchParams: { category?: string };
+  searchParams: { category?: string; page?: string };
 }) {
   const allNews = await getNews();
   const categories = await getNewsCategories();
-  
+
   // Filter by category if specified
   const selectedCategory = searchParams.category;
-  const newsItems = selectedCategory
+  const filteredNews = selectedCategory
     ? allNews.filter(item => item.categories?.includes(selectedCategory))
     : allNews;
+
+  // Pagination
+  const currentPage = parseInt(searchParams.page || "1");
+  const totalPages = Math.ceil(filteredNews.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const newsItems = filteredNews.slice(startIndex, endIndex);
 
   return (
     <div className="bg-white">
@@ -67,32 +77,34 @@ export default async function NewsPage({
       {categories.length > 0 && (
         <section className="py-8 bg-gray-50 border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
               <span className="text-sm font-medium text-gray-600">カテゴリで絞り込み:</span>
-              <Link
-                href="/news"
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  !selectedCategory
-                    ? "bg-primary-600 text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                }`}
-              >
-                すべて
-              </Link>
-              {categories.map((category) => (
+              <div className="flex flex-wrap items-center gap-3">
                 <Link
-                  key={category.id}
-                  href={`/news?category=${encodeURIComponent(category.name)}`}
+                  href="/news"
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedCategory === category.name
-                      ? "text-white shadow-md"
+                    !selectedCategory
+                      ? "bg-primary-600 text-white shadow-md"
                       : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
-                  style={selectedCategory === category.name ? { backgroundColor: category.color } : {}}
                 >
-                  {category.name}
+                  すべて
                 </Link>
-              ))}
+                {categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/news?category=${encodeURIComponent(category.name)}`}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCategory === category.name
+                        ? "text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                    }`}
+                    style={selectedCategory === category.name ? { backgroundColor: category.color } : {}}
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -115,7 +127,7 @@ export default async function NewsPage({
             {newsItems.length === 0 ? (
               <div className="col-span-full text-center py-12">
                 <p className="text-gray-500 text-lg">
-                  {selectedCategory 
+                  {selectedCategory
                     ? `「${selectedCategory}」カテゴリの記事はありません。`
                     : "お知らせはありません。"
                   }
@@ -137,6 +149,15 @@ export default async function NewsPage({
               ))
             )}
           </div>
+
+          {/* Pagination */}
+          {filteredNews.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              baseUrl="/news"
+            />
+          )}
         </div>
       </section>
     </div>
