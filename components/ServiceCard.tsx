@@ -29,9 +29,9 @@ export default function ServiceCard({
   const isSmall = size === 'small';
 
   const CardContent = (
-    <div className="flex flex-col h-full">
+    <>
       {/* Image/Visual Section */}
-      <div className={`relative ${isSmall ? 'h-32' : 'h-56'} flex-shrink-0 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 rounded-t-lg overflow-hidden`}>
+      <div className={`relative ${isSmall ? 'h-32' : 'h-56'} flex-shrink-0 bg-gray-100 transition-colors duration-200 overflow-hidden`}>
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -52,7 +52,7 @@ export default function ServiceCard({
       </div>
 
       {/* Content Section - fixed height */}
-      <div className={`${isSmall ? 'p-3 min-h-[88px]' : 'p-5 min-h-[180px]'} flex flex-col bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 rounded-b-lg`}>
+      <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col transition-colors duration-200 flex-grow`}>
         {date && (
           <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0`}>
             {date}
@@ -86,10 +86,10 @@ export default function ServiceCard({
           </svg>
         </div>
       </div>
-    </div>
+    </>
   );
 
-  const cardClassName = `group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 cursor-pointer h-full block ${className}`;
+  const cardClassName = `group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl hover:bg-[#E6E6E6] active:bg-[#E6E6E6] active:scale-[0.98] transition-all duration-200 cursor-pointer h-full flex flex-col ${className}`;
 
   if (href) {
     return (
