@@ -52,14 +52,14 @@ export default function ServiceCard({
       </div>
 
       {/* Content Section - fixed height */}
-      <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col transition-colors duration-200 flex-grow`}>
+      <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col transition-colors duration-200 flex-grow relative`}>
         {date && (
           <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0`}>
             {date}
           </div>
         )}
         {categories && categories.length > 0 && (
-          <div className={`text-xs text-gray-600 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0 truncate`}>
+          <div className={`text-xs text-gray-600 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0 truncate ${isSmall ? 'pr-6' : 'pr-8'}`}>
             <span className="bg-gray-100 px-2 py-0.5 rounded">
               {categories[0]}
             </span>
@@ -69,20 +69,19 @@ export default function ServiceCard({
           </div>
         )}
         <h3
-          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight ${isSmall ? 'line-clamp-2' : 'line-clamp-1'} flex-shrink-0`}
+          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight ${isSmall ? 'line-clamp-2' : 'line-clamp-1'} flex-shrink-0 ${isSmall ? 'pr-6' : 'pr-8'}`}
           title={title}
         >
           {title}
         </h3>
         {description && !isSmall && (
-          <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 flex-shrink-0">
+          <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 flex-shrink-0 pr-8">
             {description}
           </p>
         )}
-        {/* Spacer to push arrow to bottom */}
-        <div className="flex-grow min-h-0"></div>
-        <div className="flex justify-end flex-shrink-0 mt-1">
-          <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Arrow fixed to bottom right */}
+        <div className={`absolute ${isSmall ? 'bottom-3 right-3' : 'bottom-5 right-5'}`}>
+          <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </div>
