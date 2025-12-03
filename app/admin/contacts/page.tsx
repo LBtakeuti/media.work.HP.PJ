@@ -8,6 +8,7 @@ interface Contact {
   email: string;
   company?: string;
   phone?: string;
+  subject?: string;
   message: string;
   status: string;
   created_at: string;
@@ -114,6 +115,9 @@ export default function AdminContactsPage() {
                   お名前
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  件名
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   メールアドレス
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -136,6 +140,9 @@ export default function AdminContactsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {contact.name}
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                    {contact.subject || "-"}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {contact.email}
                   </td>
@@ -148,9 +155,9 @@ export default function AdminContactsPage() {
                       onChange={(e) => updateStatus(contact.id, e.target.value)}
                       className="text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="new">未対応</option>
-                      <option value="in_progress">対応中</option>
-                      <option value="resolved">完了</option>
+                      <option value="未対応">未対応</option>
+                      <option value="対応中">対応中</option>
+                      <option value="完了">完了</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
@@ -218,6 +225,15 @@ export default function AdminContactsPage() {
                   <p className="text-gray-900">{selectedContact.name}</p>
                 </div>
 
+                {selectedContact.subject && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      件名
+                    </label>
+                    <p className="text-gray-900">{selectedContact.subject}</p>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     メールアドレス
@@ -274,9 +290,9 @@ export default function AdminContactsPage() {
                     }}
                     className="w-full border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                   >
-                    <option value="new">未対応</option>
-                    <option value="in_progress">対応中</option>
-                    <option value="resolved">完了</option>
+                    <option value="未対応">未対応</option>
+                    <option value="対応中">対応中</option>
+                    <option value="完了">完了</option>
                   </select>
                 </div>
               </div>
