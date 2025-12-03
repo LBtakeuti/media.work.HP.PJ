@@ -37,19 +37,20 @@ export default function SmallNewsCard({ item }: SmallNewsCardProps) {
       
       {/* Content Section */}
       <div className="p-3 bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200">
-        <div className="text-xs text-gray-500 mb-1 flex flex-wrap items-center gap-2">
-          <span>
-            {format(new Date(item.date), "yyyy年MM月dd日", {
-              locale: ja,
-            })}
-          </span>
-          {item.categories && item.categories.length > 0 && (
-            <>
-              <span>|</span>
-              <span>{item.categories.join(", ")}</span>
-            </>
-          )}
+        <div className="text-xs text-gray-500 mb-1">
+          {format(new Date(item.date), "yyyy年MM月dd日", {
+            locale: ja,
+          })}
         </div>
+        {item.categories && item.categories.length > 0 && (
+          <div className="text-xs text-gray-600 mb-1 flex flex-wrap gap-1">
+            {item.categories.map((category, index) => (
+              <span key={index} className="bg-gray-100 px-2 py-0.5 rounded">
+                {category}
+              </span>
+            ))}
+          </div>
+        )}
         <h3 className="text-sm font-bold text-gray-900 leading-tight mb-1 line-clamp-2">
           {item.title}
         </h3>
