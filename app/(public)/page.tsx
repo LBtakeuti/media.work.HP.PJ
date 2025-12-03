@@ -75,9 +75,23 @@ export default async function Home() {
           <h2 className="text-[18px] font-semibold text-gray-900 mb-6 text-center">
             心に残る瞬間を、未来へ届ける。メディア戦略のプロフェッショナル集団
           </h2>
-          <p className="text-[14px] text-gray-700 leading-relaxed text-center">
-            イベントの感動を、パーソナライズされた映像で永遠に。企業の顔となるホームページやパンフレットを、想いを込めて創り上げる。私たちメディア・ワークは、単なる制作会社ではありません。貴社のメディア展開を、企画から運営、そして記憶に残るアウトプットまで、ワンストップでサポートする戦略パートナーです。最新のテクノロジーと長年の経験で、貴社の『伝えたい』をカタチにし、ビジネスの成長と成功に貢献します。
-          </p>
+          <div className="space-y-6 text-[14px] text-gray-700 leading-relaxed text-center">
+            <p>
+              イベントの感動を、パーソナライズされた映像で永遠に。
+            </p>
+            <p>
+              企業の顔となるホームページやパンフレットを、想いを込めて創り上げる。
+            </p>
+            <p>
+              私たちメディア・ワークは、単なる制作会社ではありません。
+            </p>
+            <p>
+              貴社のメディア展開を、企画から運営、そして記憶に残るアウトプットまで、ワンストップでサポートする戦略パートナーです。
+            </p>
+            <p>
+              最新のテクノロジーと長年の経験で、貴社の『伝えたい』をカタチにし、ビジネスの成長と成功に貢献します。
+            </p>
+          </div>
         </div>
         {/* Gradient transition to Services Section */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
