@@ -73,7 +73,9 @@ export default async function Home() {
         />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-[18px] font-semibold text-gray-900 mb-6 text-center">
-            心に残る瞬間を、未来へ届ける。メディア戦略のプロフェッショナル集団
+            心に残る瞬間を、未来へ届ける。
+            <br />
+            メディア戦略のプロフェッショナル集団
           </h2>
           <div className="space-y-6 text-[14px] text-gray-700 leading-relaxed text-center">
             <p>
