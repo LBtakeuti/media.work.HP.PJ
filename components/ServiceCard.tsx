@@ -29,9 +29,9 @@ export default function ServiceCard({
   const isSmall = size === 'small';
 
   const CardContent = (
-    <div className="flex flex-col h-full rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full">
       {/* Image/Visual Section */}
-      <div className={`relative ${isSmall ? 'h-32' : 'h-56'} flex-shrink-0 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200`}>
+      <div className={`relative ${isSmall ? 'h-32' : 'h-56'} flex-shrink-0 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 rounded-t-lg overflow-hidden`}>
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -52,14 +52,19 @@ export default function ServiceCard({
       </div>
 
       {/* Content Section - fixed height */}
-      <div className={`${isSmall ? 'p-3 min-h-[88px]' : 'p-5 min-h-[180px]'} flex flex-col bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200`}>
-        {(date || (categories && categories.length > 0)) && (
-          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} truncate flex-shrink-0`}>
-            {date && <span>{date}</span>}
-            {date && categories && categories.length > 0 && <span> | </span>}
-            {categories && categories.length > 0 && (
-              <span>{categories.join(", ")}</span>
-            )}
+      <div className={`${isSmall ? 'p-3 min-h-[88px]' : 'p-5 min-h-[180px]'} flex flex-col bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 rounded-b-lg`}>
+        {date && (
+          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0`}>
+            {date}
+          </div>
+        )}
+        {categories && categories.length > 0 && (
+          <div className={`text-xs text-gray-600 ${isSmall ? 'mb-1' : 'mb-3'} flex flex-wrap gap-1 flex-shrink-0`}>
+            {categories.map((category, index) => (
+              <span key={index} className="bg-gray-100 px-2 py-0.5 rounded">
+                {category}
+              </span>
+            ))}
           </div>
         )}
         <h3
@@ -84,7 +89,7 @@ export default function ServiceCard({
     </div>
   );
 
-  const cardClassName = `group bg-white rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 cursor-pointer h-full block ${className}`;
+  const cardClassName = `group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 cursor-pointer h-full block ${className}`;
 
   if (href) {
     return (
