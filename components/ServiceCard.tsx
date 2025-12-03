@@ -69,7 +69,7 @@ export default function ServiceCard({
           </div>
         )}
         <h3
-          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight ${isSmall ? 'line-clamp-2' : 'line-clamp-1'} flex-shrink-0 ${isSmall ? 'pr-6' : 'pr-8'}`}
+          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight line-clamp-2 flex-shrink-0 ${isSmall ? 'pr-6' : 'pr-8'}`}
           title={title}
         >
           {title}
