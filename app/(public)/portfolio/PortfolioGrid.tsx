@@ -425,7 +425,14 @@ function ImageGalleryCard({
       </div>
 
       {/* コンテンツ - 固定高さ */}
-      <div className="relative p-4 h-[140px] flex flex-col">
+      <div className="relative p-4 h-[160px] flex flex-col">
+        {item.category && (
+          <div className="text-xs text-gray-500 mb-1">
+            <span className="bg-gray-100 px-2 py-0.5 rounded">
+              {item.category.name}
+            </span>
+          </div>
+        )}
         <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-1">{item.title}</h3>
         <p className="text-sm text-gray-600 line-clamp-2 flex-grow">
           {item.description || "\u00A0"}
@@ -486,7 +493,14 @@ function YouTubeCard({
         </div>
       )}
       {/* コンテンツ - 固定高さ */}
-      <div className="relative p-4 h-[140px] flex flex-col">
+      <div className="relative p-4 h-[160px] flex flex-col">
+        {item.category && (
+          <div className="text-xs text-gray-500 mb-1">
+            <span className="bg-gray-100 px-2 py-0.5 rounded">
+              {item.category.name}
+            </span>
+          </div>
+        )}
         <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-1">{item.title}</h3>
         <p className="text-sm text-gray-600 line-clamp-2 flex-grow">
           {item.description || "\u00A0"}
