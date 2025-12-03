@@ -1,6 +1,92 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveContact } from "@/lib/supabase-data";
 
+// Slackに通知を送信する関数
+async function sendSlackNotification(contact: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+
+  if (!webhookUrl || webhookUrl === 'your_slack_webhook_url') {
+    console.log('Slack Webhook URL is not configured');
+    return;
+  }
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: '新しいお問い合わせがありました',
+        blocks: [
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: '📧 新しいお問い合わせ',
+              emoji: true,
+            },
+          },
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*お名前:*\n${contact.name}`,
+              },
+              {
+                type: 'mrkdwn',
+                text: `*メールアドレス:*\n${contact.email}`,
+              },
+            ],
+          },
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*件名:*\n${contact.subject}`,
+              },
+            ],
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*お問い合わせ内容:*\n${contact.message}`,
+            },
+          },
+          {
+            type: 'divider',
+          },
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `送信日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}`,
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to send Slack notification:', await response.text());
+    } else {
+      console.log('Slack notification sent successfully');
+    }
+  } catch (error) {
+    console.error('Error sending Slack notification:', error);
+  }
+}
+
 // レート制限の設定
 const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5分（ミリ秒）
 const RATE_LIMIT_MAX_REQUESTS = 3; // 最大送信数
@@ -69,12 +155,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // データベースに保存
     await saveContact({
       name,
       email,
       subject,
       message,
       status: '未対応',
+    });
+
+    // Slackに通知を送信（非同期で実行、エラーが発生しても処理を続行）
+    sendSlackNotification({ name, email, subject, message }).catch((error) => {
+      console.error('Slack notification failed:', error);
     });
 
     return NextResponse.json({ success: true }, { status: 200 });
