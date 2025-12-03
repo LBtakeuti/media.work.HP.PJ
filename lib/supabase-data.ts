@@ -217,8 +217,13 @@ export async function getNews(): Promise<NewsItem[]> {
     .order('sort_order', { ascending: true });
 
   if (error) {
-    console.error('Error fetching news:', error);
-    throw error;
+    console.error('Error fetching news:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
+    throw new Error(`Failed to fetch news: ${error.message} (code: ${error.code})`);
   }
 
   // カテゴリ名を配列に変換
@@ -489,8 +494,13 @@ export async function getServices(): Promise<ServiceItem[]> {
     .order('sort_order', { ascending: true });
 
   if (error) {
-    console.error('Error fetching services:', error);
-    throw error;
+    console.error('Error fetching services:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
+    throw new Error(`Failed to fetch services: ${error.message} (code: ${error.code})`);
   }
 
   // カテゴリ名を配列に変換
