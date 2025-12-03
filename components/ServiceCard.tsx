@@ -52,7 +52,7 @@ export default function ServiceCard({
       </div>
 
       {/* Content Section - fixed height */}
-      <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col transition-colors duration-200 flex-grow relative`}>
+      <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col transition-colors duration-200 flex-grow`}>
         {date && (
           <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0`}>
             {date}
@@ -79,17 +79,18 @@ export default function ServiceCard({
             {description}
           </p>
         )}
-        {/* Arrow fixed to bottom right */}
-        <div className={`absolute ${isSmall ? 'bottom-3 right-3' : 'bottom-5 right-5'}`}>
-          <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
+      </div>
+
+      {/* Arrow fixed to bottom right of entire card */}
+      <div className={`absolute ${isSmall ? 'bottom-3 right-3' : 'bottom-5 right-5'}`}>
+        <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
       </div>
     </>
   );
 
-  const cardClassName = `group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl hover:bg-[#E6E6E6] active:bg-[#E6E6E6] active:scale-[0.98] transition-all duration-200 cursor-pointer h-full flex flex-col ${className}`;
+  const cardClassName = `group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl hover:bg-[#E6E6E6] active:bg-[#E6E6E6] active:scale-[0.98] transition-all duration-200 cursor-pointer h-full flex flex-col relative ${className}`;
 
   if (href) {
     return (
