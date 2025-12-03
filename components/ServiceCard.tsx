@@ -59,16 +59,17 @@ export default function ServiceCard({
           </div>
         )}
         {categories && categories.length > 0 && (
-          <div className={`text-xs text-gray-600 ${isSmall ? 'mb-1' : 'mb-3'} flex flex-wrap gap-1 flex-shrink-0`}>
-            {categories.map((category, index) => (
-              <span key={index} className="bg-gray-100 px-2 py-0.5 rounded">
-                {category}
-              </span>
-            ))}
+          <div className={`text-xs text-gray-600 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0 truncate`}>
+            <span className="bg-gray-100 px-2 py-0.5 rounded">
+              {categories[0]}
+            </span>
+            {categories.length > 1 && (
+              <span className="ml-1">...</span>
+            )}
           </div>
         )}
         <h3
-          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight line-clamp-1 flex-shrink-0`}
+          className={`${isSmall ? 'text-sm' : 'text-xl'} font-bold text-gray-900 ${isSmall ? 'mb-1' : 'mb-3'} leading-tight ${isSmall ? 'line-clamp-2' : 'line-clamp-1'} flex-shrink-0`}
           title={title}
         >
           {title}
@@ -79,9 +80,9 @@ export default function ServiceCard({
           </p>
         )}
         {/* Spacer to push arrow to bottom */}
-        <div className="flex-grow"></div>
-        <div className="flex justify-end flex-shrink-0">
-          <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex-grow min-h-0"></div>
+        <div className="flex justify-end flex-shrink-0 mt-1">
+          <svg className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-gray-600 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </div>
