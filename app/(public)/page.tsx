@@ -47,7 +47,7 @@ export default async function Home() {
         <div className="relative z-10 h-full flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <AnimatedTitle
-              text="心に残る瞬間を、未来に届ける。"
+              text="心に残る瞬間を、|未来に届ける。"
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg"
               highlightColor="text-[#393D45]"
               duration={2000}
@@ -102,7 +102,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <AnimatedSectionTitle className="text-3xl md:text-4xl font-bold text-[#1e3a5f]">
-              サービス
+              サービス<span className="text-xl md:text-2xl font-normal ml-2">/SERVICE</span>
             </AnimatedSectionTitle>
             <Link
               href="/services"
@@ -186,7 +186,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <AnimatedSectionTitle className="text-3xl md:text-4xl font-bold text-[#1e3a5f]">
-              ニュース
+              ニュース<span className="text-xl md:text-2xl font-normal ml-2">/NEWS</span>
             </AnimatedSectionTitle>
             <Link
               href="/news"

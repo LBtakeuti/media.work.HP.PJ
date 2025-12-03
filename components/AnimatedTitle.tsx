@@ -23,8 +23,12 @@ export default function AnimatedTitle({
       const indices: number[] = [];
       const availableIndices = characters
         .map((_, index) => index)
-        .filter((index) => characters[index] !== " " && characters[index] !== "、");
-      
+        .filter((index) =>
+          characters[index] !== " " &&
+          characters[index] !== "、" &&
+          characters[index] !== "|"
+        );
+
       // 2つのランダムなインデックスを選択
       while (indices.length < 2 && availableIndices.length > 0) {
         const randomIndex = Math.floor(Math.random() * availableIndices.length);
@@ -37,7 +41,7 @@ export default function AnimatedTitle({
           break;
         }
       }
-      
+
       return indices;
     };
 
@@ -55,7 +59,12 @@ export default function AnimatedTitle({
     <h1 className={className}>
       {characters.map((char, index) => {
         const isActive = activeIndices.includes(index);
-        
+
+        // 改行文字の処理（|で改行を表現）
+        if (char === "|") {
+          return <br key={index} className="md:hidden" />;
+        }
+
         return (
           <span
             key={index}
