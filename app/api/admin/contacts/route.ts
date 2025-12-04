@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
-    
+
     const { data: contacts, error } = await supabase
       .from('contacts')
       .select('*')
@@ -15,7 +15,11 @@ export async function GET() {
       throw error;
     }
 
-    return NextResponse.json(contacts || []);
+    return NextResponse.json(contacts || [], {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
   } catch (error) {
     console.error("Error fetching contacts:", error);
     return NextResponse.json(
