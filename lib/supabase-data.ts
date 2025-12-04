@@ -841,6 +841,8 @@ export async function deleteContact(id: string): Promise<void> {
 export interface PortfolioCategory {
   id: string;
   name: string;
+  slug?: string;
+  color?: string;
   sort_order?: number;
   created_at?: string;
   updated_at?: string;
