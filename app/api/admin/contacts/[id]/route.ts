@@ -31,57 +31,5 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const body = await request.json();
-    const { status } = body;
-
-    console.log('PATCH /api/admin/contacts/[id] - Received:', { id: params.id, status });
-
-    if (!status) {
-      console.error('PATCH error: status not provided');
-      return NextResponse.json(
-        { error: "ステータスが指定されていません" },
-        { status: 400 }
-      );
-    }
-
-    const supabase = getSupabaseAdmin();
-
-    const { data, error } = await supabase
-      .from('contacts')
-      .update({ status })
-      .eq('id', params.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating contact status:', {
-        id: params.id,
-        status,
-        error: error.message,
-        code: error.code,
-        details: error.details
-      });
-      return NextResponse.json(
-        { error: `お問い合わせの更新に失敗しました: ${error.message}` },
-        { status: 404 }
-      );
-    }
-
-    console.log('Contact status updated successfully:', { id: params.id, newStatus: status });
-    return NextResponse.json(data, { status: 200 });
-  } catch (error: any) {
-    console.error("Error updating contact:", error);
-    return NextResponse.json(
-      { error: `ステータスの更新に失敗しました: ${error?.message || '不明なエラー'}` },
-      { status: 500 }
-    );
-  }
-}
-
 
 

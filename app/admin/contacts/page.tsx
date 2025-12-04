@@ -10,7 +10,6 @@ interface Contact {
   phone?: string;
   subject?: string;
   message: string;
-  status: string;
   created_at: string;
 }
 
@@ -45,29 +44,6 @@ export default function AdminContactsPage() {
       alert("お問い合わせの取得に失敗しました。ページを再読み込みしてください。");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      const response = await fetch(`/api/admin/contacts/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      });
-
-      if (response.ok) {
-        await loadContacts();
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Failed to update status:", errorData);
-        alert(`ステータスの更新に失敗しました: ${errorData.error || response.statusText}`);
-      }
-    } catch (error) {
-      console.error("Failed to update status:", error);
-      alert(`ステータスの更新に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`);
     }
   };
 
@@ -140,9 +116,6 @@ export default function AdminContactsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   会社名
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ステータス
-                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   操作
                 </th>
@@ -165,17 +138,6 @@ export default function AdminContactsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {contact.company || "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      value={contact.status}
-                      onChange={(e) => updateStatus(contact.id, e.target.value)}
-                      className="text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value="未対応">未対応</option>
-                      <option value="対応中">対応中</option>
-                      <option value="対応済み">対応済み</option>
-                    </select>
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
                     <button
@@ -290,27 +252,6 @@ export default function AdminContactsPage() {
                   <p className="text-gray-900 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
                     {selectedContact.message}
                   </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ステータス
-                  </label>
-                  <select
-                    value={selectedContact.status}
-                    onChange={(e) => {
-                      updateStatus(selectedContact.id, e.target.value);
-                      setSelectedContact({
-                        ...selectedContact,
-                        status: e.target.value,
-                      });
-                    }}
-                    className="w-full border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  >
-                    <option value="未対応">未対応</option>
-                    <option value="対応中">対応中</option>
-                    <option value="対応済み">対応済み</option>
-                  </select>
                 </div>
               </div>
 
