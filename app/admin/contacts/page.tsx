@@ -44,6 +44,8 @@ export default function AdminContactsPage() {
   };
 
   const updateStatus = async (id: string, status: string) => {
+    // 明示的なデバッグ用アラート - これが表示されない場合はonChangeが発火していない
+    alert(`updateStatus called: ${status}`);
     console.log('Updating status:', { id, status });
     try {
       const response = await fetch(`/api/admin/contacts/${id}`, {
@@ -60,6 +62,7 @@ export default function AdminContactsPage() {
         console.log('Status updated successfully, reloading contacts...');
         await loadContacts();
         console.log('Contacts reloaded');
+        alert('ステータスが更新されました');
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Failed to update status:", errorData);
