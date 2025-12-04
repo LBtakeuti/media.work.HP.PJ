@@ -48,9 +48,14 @@ export default function AdminContactsPage() {
 
       if (response.ok) {
         await loadContacts();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to update status:", errorData);
+        alert(`ステータスの更新に失敗しました: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
       console.error("Failed to update status:", error);
+      alert("ステータスの更新に失敗しました");
     }
   };
 

@@ -39,7 +39,10 @@ export async function PATCH(
     const body = await request.json();
     const { status } = body;
 
+    console.log('PATCH /api/admin/contacts/[id] - Received:', { id: params.id, status });
+
     if (!status) {
+      console.error('PATCH error: status not provided');
       return NextResponse.json(
         { error: "ステータスが指定されていません" },
         { status: 400 }
@@ -56,18 +59,25 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error('Error updating contact status:', error);
+      console.error('Error updating contact status:', {
+        id: params.id,
+        status,
+        error: error.message,
+        code: error.code,
+        details: error.details
+      });
       return NextResponse.json(
-        { error: "お問い合わせが見つかりません" },
+        { error: `お問い合わせの更新に失敗しました: ${error.message}` },
         { status: 404 }
       );
     }
 
+    console.log('Contact status updated successfully:', { id: params.id, newStatus: status });
     return NextResponse.json(data, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating contact:", error);
     return NextResponse.json(
-      { error: "ステータスの更新に失敗しました" },
+      { error: `ステータスの更新に失敗しました: ${error?.message || '不明なエラー'}` },
       { status: 500 }
     );
   }
