@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
 };
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 6;
 
 export default async function NewsPage({
   searchParams,
@@ -139,7 +139,6 @@ export default async function NewsPage({
                   key={item.id}
                   title={item.title}
                   description={item.summary}
-                  date={format(new Date(item.date), "yyyy年MM月dd日", { locale: ja })}
                   categories={item.categories}
                   imageSrc={item.image}
                   imageAlt={item.title}

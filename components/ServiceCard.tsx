@@ -53,11 +53,6 @@ export default function ServiceCard({
 
       {/* Content Section - fixed height */}
       <div className={`${isSmall ? 'p-3 h-[88px]' : 'p-5 h-[180px]'} flex flex-col transition-colors duration-200 flex-grow`}>
-        {date && (
-          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0`}>
-            {date}
-          </div>
-        )}
         {categories && categories.length > 0 && (
           <div className={`text-xs text-gray-600 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0 truncate ${isSmall ? 'pr-6' : 'pr-8'}`}>
             <span className="bg-gray-100 px-2 py-0.5 rounded">
@@ -66,6 +61,11 @@ export default function ServiceCard({
             {categories.length > 1 && (
               <span className="ml-1">...</span>
             )}
+          </div>
+        )}
+        {date && (
+          <div className={`text-xs text-gray-500 ${isSmall ? 'mb-1' : 'mb-3'} flex-shrink-0`}>
+            {date}
           </div>
         )}
         <h3

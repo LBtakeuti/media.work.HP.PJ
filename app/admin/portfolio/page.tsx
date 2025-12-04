@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { PortfolioItem } from "@/lib/supabase-data";
+import { PortfolioItem, PortfolioCategory } from "@/lib/supabase-data";
 
 // YouTubeのサムネイルURLを取得
 function getYoutubeThumbnail(url: string): string {
@@ -28,12 +28,15 @@ function extractYoutubeId(url: string): string | null {
 
 export default function AdminPortfolioPage() {
   const [portfolios, setPortfolios] = useState<PortfolioItem[]>([]);
+  const [categories, setCategories] = useState<PortfolioCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
 
   useEffect(() => {
     loadPortfolios();
+    loadCategories();
   }, []);
 
   const loadPortfolios = async () => {
@@ -53,17 +56,45 @@ export default function AdminPortfolioPage() {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      const response = await fetch("/api/admin/categories/portfolio");
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+    }
+  };
+
+  // フィルタリングされたポートフォリオを取得
+  const getFilteredPortfolios = () => {
+    if (!selectedCategory) {
+      return portfolios;
+    }
+    return portfolios.filter(item => item.category?.name === selectedCategory);
+  };
+
   const handleMove = async (index: number, direction: "up" | "down") => {
     if (isReordering) return;
 
+    const filteredPortfolios = getFilteredPortfolios();
     const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= portfolios.length) return;
+    if (newIndex < 0 || newIndex >= filteredPortfolios.length) return;
 
     setIsReordering(true);
 
+    // フィルタリングされたリスト内で入れ替え
+    const itemToMove = filteredPortfolios[index];
+    const itemToSwap = filteredPortfolios[newIndex];
+
+    // 全体のポートフォリオリストの中でのインデックスを取得
+    const fullIndexToMove = portfolios.findIndex(p => p.id === itemToMove.id);
+    const fullIndexToSwap = portfolios.findIndex(p => p.id === itemToSwap.id);
+
     // ローカルで順序を入れ替え
     const newPortfolios = [...portfolios];
-    [newPortfolios[index], newPortfolios[newIndex]] = [newPortfolios[newIndex], newPortfolios[index]];
+    [newPortfolios[fullIndexToMove], newPortfolios[fullIndexToSwap]] =
+      [newPortfolios[fullIndexToSwap], newPortfolios[fullIndexToMove]];
 
     // sort_orderを更新
     const updatedItems = newPortfolios.map((item, i) => ({
@@ -138,6 +169,8 @@ export default function AdminPortfolioPage() {
     );
   }
 
+  const filteredPortfolios = getFilteredPortfolios();
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -150,6 +183,57 @@ export default function AdminPortfolioPage() {
         </Link>
       </div>
 
+      {/* カテゴリフィルター */}
+      {categories.length > 0 && (
+        <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-medium text-gray-600">カテゴリで絞り込み:</span>
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                !selectedCategory
+                  ? "bg-primary-600 text-white shadow-md"
+                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+              }`}
+            >
+              すべて ({portfolios.length})
+            </button>
+            {categories.map((category) => {
+              const count = portfolios.filter(p => p.category?.name === category.name).length;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.name)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedCategory === category.name
+                      ? "text-white shadow-md"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                  }`}
+                  style={selectedCategory === category.name ? { backgroundColor: category.color } : {}}
+                >
+                  {category.name} ({count})
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* フィルター選択時の表示メッセージ */}
+      {selectedCategory && (
+        <div className="mb-4">
+          <p className="text-gray-600 text-sm">
+            「<span className="font-medium">{selectedCategory}</span>」カテゴリを表示中（{filteredPortfolios.length}件）
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className="ml-2 text-primary-600 hover:underline text-sm"
+            >
+              フィルターを解除
+            </button>
+          </p>
+        </div>
+      )}
+
       {portfolios.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
           <p className="text-gray-600 mb-4">ポートフォリオがありません</p>
@@ -159,6 +243,18 @@ export default function AdminPortfolioPage() {
           >
             最初のポートフォリオを作成する
           </Link>
+        </div>
+      ) : filteredPortfolios.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <p className="text-gray-600 mb-4">
+            「{selectedCategory}」カテゴリのポートフォリオはありません
+          </p>
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className="text-primary-600 hover:text-primary-700 font-medium"
+          >
+            すべてのポートフォリオを表示
+          </button>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -189,7 +285,7 @@ export default function AdminPortfolioPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {portfolios.map((item, index) => {
+              {filteredPortfolios.map((item, index) => {
                 const thumbnail = getThumbnail(item);
                 return (
                   <tr key={item.id} className="hover:bg-gray-50">
@@ -207,7 +303,7 @@ export default function AdminPortfolioPage() {
                         </button>
                         <button
                           onClick={() => handleMove(index, "down")}
-                          disabled={index === portfolios.length - 1 || isReordering}
+                          disabled={index === filteredPortfolios.length - 1 || isReordering}
                           className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
                           title="下へ移動"
                         >
