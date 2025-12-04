@@ -162,7 +162,7 @@ export default function AdminContactsPage() {
                     >
                       <option value="未対応">未対応</option>
                       <option value="対応中">対応中</option>
-                      <option value="完了">完了</option>
+                      <option value="対応済み">対応済み</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
@@ -297,7 +297,7 @@ export default function AdminContactsPage() {
                   >
                     <option value="未対応">未対応</option>
                     <option value="対応中">対応中</option>
-                    <option value="完了">完了</option>
+                    <option value="対応済み">対応済み</option>
                   </select>
                 </div>
               </div>
