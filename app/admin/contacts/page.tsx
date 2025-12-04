@@ -27,16 +27,24 @@ export default function AdminContactsPage() {
   const loadContacts = async () => {
     try {
       const response = await fetch("/api/admin/contacts");
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contacts: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log('Contacts loaded:', data.length);
       setContacts(data);
     } catch (error) {
       console.error("Failed to load contacts:", error);
+      alert("お問い合わせの取得に失敗しました。ページを再読み込みしてください。");
     } finally {
       setIsLoading(false);
     }
   };
 
   const updateStatus = async (id: string, status: string) => {
+    console.log('Updating status:', { id, status });
     try {
       const response = await fetch(`/api/admin/contacts/${id}`, {
         method: "PATCH",
@@ -46,8 +54,12 @@ export default function AdminContactsPage() {
         body: JSON.stringify({ status }),
       });
 
+      console.log('Update response:', response.status, response.ok);
+
       if (response.ok) {
+        console.log('Status updated successfully, reloading contacts...');
         await loadContacts();
+        console.log('Contacts reloaded');
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Failed to update status:", errorData);
@@ -55,7 +67,7 @@ export default function AdminContactsPage() {
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      alert("ステータスの更新に失敗しました");
+      alert(`ステータスの更新に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`);
     }
   };
 
