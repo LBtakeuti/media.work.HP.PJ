@@ -161,7 +161,6 @@ export async function POST(request: NextRequest) {
       email,
       subject,
       message,
-      status: '未対応',
     });
 
     // Slackに通知を送信（非同期で実行、エラーが発生しても処理を続行）
