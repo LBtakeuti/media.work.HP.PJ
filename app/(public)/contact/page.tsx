@@ -7,6 +7,7 @@ import Image from "next/image";
 
 interface ContactForm {
   name: string;
+  company?: string;
   email: string;
   subject: string;
   message: string;
@@ -110,6 +111,22 @@ export default function ContactPage() {
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                 )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="company"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  会社名
+                </label>
+                <input
+                  type="text"
+                  id="company"
+                  {...register("company")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="例：株式会社メディア・ワーク"
+                />
               </div>
 
               <div>

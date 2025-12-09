@@ -4,6 +4,7 @@ import { saveContact } from "@/lib/supabase-data";
 // Slackに通知を送信する関数
 async function sendSlackNotification(contact: {
   name: string;
+  company?: string;
   email: string;
   subject: string;
   message: string;
@@ -39,6 +40,15 @@ async function sendSlackNotification(contact: {
                 type: 'mrkdwn',
                 text: `*お名前:*\n${contact.name}`,
               },
+              {
+                type: 'mrkdwn',
+                text: `*会社名:*\n${contact.company || '未入力'}`,
+              },
+            ],
+          },
+          {
+            type: 'section',
+            fields: [
               {
                 type: 'mrkdwn',
                 text: `*メールアドレス:*\n${contact.email}`,
@@ -135,7 +145,7 @@ function checkRateLimit(email: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, subject, message } = body;
+    const { name, company, email, subject, message } = body;
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
@@ -158,13 +168,14 @@ export async function POST(request: NextRequest) {
     // データベースに保存
     await saveContact({
       name,
+      company,
       email,
       subject,
       message,
     });
 
     // Slackに通知を送信（非同期で実行、エラーが発生しても処理を続行）
-    sendSlackNotification({ name, email, subject, message }).catch((error) => {
+    sendSlackNotification({ name, company, email, subject, message }).catch((error) => {
       console.error('Slack notification failed:', error);
     });
 
