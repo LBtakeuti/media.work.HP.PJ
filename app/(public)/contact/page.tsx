@@ -204,8 +204,8 @@ export default function ContactPage() {
                       className="text-primary-600 hover:underline"
                     >
                       プライバシーポリシー
-                    </a>
-                    に同意する <span className="text-red-500">*</span>
+                    </a>に同意する{" "}
+                    <span className="text-red-500">*</span>
                   </span>
                 </label>
                 {errors.privacyPolicy && (

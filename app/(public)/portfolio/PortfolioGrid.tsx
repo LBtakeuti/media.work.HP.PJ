@@ -234,8 +234,6 @@ function FullscreenModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-      onClick={onClose}
-      onKeyDown={(e) => e.key === "Escape" && onClose()}
       role="dialog"
       aria-modal="true"
       aria-label={item.title}
@@ -262,7 +260,9 @@ function FullscreenModal({
       {/* コンテンツ */}
       <div
         className="relative w-full max-w-6xl mx-4"
+        role="document"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {isGallery ? (
           <>
