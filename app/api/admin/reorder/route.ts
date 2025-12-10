@@ -81,13 +81,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error reordering items:', error);
     console.error('Error details:', JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { 
+      {
         message: '表示順の更新に失敗しました',
-        error: error?.message || String(error),
+        error: error instanceof Error ? error.message : String(error),
         details: error
       },
       { status: 500 }

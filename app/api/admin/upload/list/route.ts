@@ -20,8 +20,8 @@ export async function GET() {
       }));
 
       return NextResponse.json(images);
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
+    } catch (error: unknown) {
+      if (error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT") {
         // ディレクトリが存在しない場合は空配列を返す
         return NextResponse.json([]);
       }

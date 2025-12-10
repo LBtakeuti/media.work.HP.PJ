@@ -177,7 +177,7 @@ export default function AdminPortfolioCategoriesPage() {
               id="new-category-sort"
               value={newCategorySortOrder}
               onChange={(e) =>
-                setNewCategorySortOrder(parseInt(e.target.value) || 0)
+                setNewCategorySortOrder(Number.parseInt(e.target.value, 10) || 0)
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
@@ -222,7 +222,7 @@ export default function AdminPortfolioCategoriesPage() {
                         type="number"
                         value={editingSortOrder}
                         onChange={(e) =>
-                          setEditingSortOrder(parseInt(e.target.value) || 0)
+                          setEditingSortOrder(Number.parseInt(e.target.value, 10) || 0)
                         }
                         className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />

@@ -117,9 +117,9 @@ export default function AdminPortfolioPage() {
         console.error("Reorder error:", errorData);
         throw new Error(errorMessage);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to reorder:", error);
-      const errorMessage = error?.message || "順序の更新に失敗しました";
+      const errorMessage = error instanceof Error ? error.message : "順序の更新に失敗しました";
       alert(errorMessage);
       await loadPortfolios(); // エラー時は再読み込み
     } finally {

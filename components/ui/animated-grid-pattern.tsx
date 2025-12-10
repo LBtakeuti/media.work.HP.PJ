@@ -9,7 +9,7 @@ interface AnimatedGridPatternProps {
   height?: number;
   x?: number;
   y?: number;
-  strokeDasharray?: any;
+  strokeDasharray?: string | number;
   numSquares?: number;
   className?: string;
   maxOpacity?: number;

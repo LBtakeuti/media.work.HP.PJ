@@ -37,7 +37,7 @@ export default async function NewsPage({
     : allNews;
 
   // Pagination
-  const currentPage = parseInt(searchParams.page || "1");
+  const currentPage = Number.parseInt(searchParams.page || "1", 10);
   const totalPages = Math.ceil(filteredNews.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;

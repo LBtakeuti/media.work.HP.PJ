@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from './supabase';
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
@@ -43,7 +44,7 @@ export const authService = {
   },
 
   // 認証状態の変更を監視
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+  onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
     return supabase.auth.onAuthStateChange(callback);
   },
 };

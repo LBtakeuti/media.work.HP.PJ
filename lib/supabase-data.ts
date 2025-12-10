@@ -358,7 +358,7 @@ export async function createNews(news: Omit<NewsItem, 'id'>): Promise<NewsItem> 
     for (const item of existingNews) {
       const match = item.slug?.match(/^news-(\d+)$/);
       if (match) {
-        const num = parseInt(match[1], 10);
+        const num = Number.parseInt(match[1], 10);
         // タイムスタンプ形式（10桁以上）は除外し、連番のみを対象とする
         if (num < 100000 && num > maxNumber) {
           maxNumber = num;
@@ -655,7 +655,7 @@ export async function createService(service: Omit<ServiceItem, 'id'>): Promise<S
     for (const item of existingServices) {
       const match = item.slug?.match(/^service-(\d+)$/);
       if (match) {
-        const num = parseInt(match[1], 10);
+        const num = Number.parseInt(match[1], 10);
         // タイムスタンプ形式（10桁以上）は除外し、連番のみを対象とする
         if (num < 100000 && num > maxNumber) {
           maxNumber = num;
