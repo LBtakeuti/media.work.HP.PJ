@@ -258,11 +258,10 @@ function FullscreenModal({
       </div>
 
       {/* コンテンツ */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
         className="relative w-full max-w-6xl mx-4"
-        role="document"
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
       >
         {isGallery ? (
           <>

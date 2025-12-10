@@ -152,10 +152,11 @@ export default function AdminNewsCategoriesPage() {
         <h2 className="text-lg font-bold text-gray-900 mb-4">新しいカテゴリを作成</h2>
         <form onSubmit={handleCreate} className="flex gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="new-category-name" className="block text-sm font-medium text-gray-700 mb-1">
               カテゴリ名 *
             </label>
             <input
+              id="new-category-name"
               type="text"
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
@@ -165,10 +166,11 @@ export default function AdminNewsCategoriesPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="new-category-color" className="block text-sm font-medium text-gray-700 mb-1">
               カラー
             </label>
             <input
+              id="new-category-color"
               type="color"
               value={newCategoryColor}
               onChange={(e) => setNewCategoryColor(e.target.value)}
