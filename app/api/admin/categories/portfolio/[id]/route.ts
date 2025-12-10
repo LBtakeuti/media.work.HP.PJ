@@ -18,8 +18,8 @@ export async function PUT(
     // slugを自動生成
     let slug = name
       .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
+      .replaceAll(/\s+/g, '-')
+      .replaceAll(/[^\w\-]+/g, '')
       .substring(0, 100);
 
     if (!slug) {

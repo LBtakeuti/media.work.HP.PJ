@@ -390,10 +390,11 @@ export default function RichTextEditor({
             <h3 className="text-lg font-semibold mb-4">リンクを設定</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="link-text-input" className="block text-sm font-medium text-gray-700 mb-1">
                   表示テキスト
                 </label>
                 <input
+                  id="link-text-input"
                   type="text"
                   value={linkText}
                   onChange={(e) => setLinkText(e.target.value)}
@@ -408,7 +409,7 @@ export default function RichTextEditor({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="link-url-input" className="block text-sm font-medium text-gray-700 mb-1">
                   URL
                 </label>
                 <input

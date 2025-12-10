@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
 
     let slug = name
       .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
+      .replaceAll(/\s+/g, '-')
+      .replaceAll(/[^\w\-]+/g, '')
       .substring(0, 100);
 
     if (!slug) {
