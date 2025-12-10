@@ -189,34 +189,34 @@ export default function AdminContactsPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">
                     日時
-                  </label>
+                  </span>
                   <p className="text-gray-900">
                     {new Date(selectedContact.created_at).toLocaleString("ja-JP")}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">
                     お名前
-                  </label>
+                  </span>
                   <p className="text-gray-900">{selectedContact.name}</p>
                 </div>
 
                 {selectedContact.subject && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <span className="block text-sm font-medium text-gray-700 mb-1">
                       件名
-                    </label>
+                    </span>
                     <p className="text-gray-900">{selectedContact.subject}</p>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">
                     メールアドレス
-                  </label>
+                  </span>
                   <p className="text-gray-900">
                     <a
                       href={`mailto:${selectedContact.email}`}
@@ -229,26 +229,26 @@ export default function AdminContactsPage() {
 
                 {selectedContact.company && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <span className="block text-sm font-medium text-gray-700 mb-1">
                       会社名
-                    </label>
+                    </span>
                     <p className="text-gray-900">{selectedContact.company}</p>
                   </div>
                 )}
 
                 {selectedContact.phone && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <span className="block text-sm font-medium text-gray-700 mb-1">
                       電話番号
-                    </label>
+                    </span>
                     <p className="text-gray-900">{selectedContact.phone}</p>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">
                     お問い合わせ内容
-                  </label>
+                  </span>
                   <p className="text-gray-900 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
                     {selectedContact.message}
                   </p>
