@@ -191,9 +191,9 @@ export default function EditPortfolioPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
           {/* 投稿形態の選択 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <span className="block text-sm font-medium text-gray-700 mb-2">
               投稿形態 <span className="text-red-500">*</span>
-            </label>
+            </span>
             <div className="flex gap-4">
               <label className="flex items-center">
                 <input
@@ -297,9 +297,9 @@ export default function EditPortfolioPage() {
           {formData.display_type === "gallery" && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <span className="block text-sm font-medium text-gray-700 mb-2">
                   画像 <span className="text-red-500">*</span>
-                </label>
+                </span>
                 <div className="space-y-4">
                   {/* アップロードボタン */}
                   <div>

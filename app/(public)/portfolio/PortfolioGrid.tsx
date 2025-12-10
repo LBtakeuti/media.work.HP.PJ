@@ -258,11 +258,10 @@ function FullscreenModal({
       </div>
 
       {/* コンテンツ */}
-      <div
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
+      <article
         className="relative w-full max-w-6xl mx-4"
-        role="document"
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
       >
         {isGallery ? (
           <>
@@ -350,7 +349,7 @@ function FullscreenModal({
             {item.description}
           </p>
         )}
-      </div>
+      </article>
     </div>
   );
 }

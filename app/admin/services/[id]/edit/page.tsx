@@ -159,9 +159,9 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
 
         {/* Categories (Multiple Selection) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <span className="block text-sm font-medium text-gray-700 mb-2">
             カテゴリ（複数選択可） *
-          </label>
+          </span>
           {availableCategories.length === 0 ? (
             <p className="text-sm text-gray-500">
               カテゴリがありません。
@@ -201,9 +201,9 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
 
         {/* Image */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <span className="block text-sm font-medium text-gray-700 mb-2">
             画像
-          </label>
+          </span>
           <ImageSelector
             value={formData.image}
             onChange={(image) => setFormData({ ...formData, image })}
@@ -244,9 +244,9 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
 
         {/* Content */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <span className="block text-sm font-medium text-gray-700 mb-2">
             本文 *
-          </label>
+          </span>
           <RichTextEditor
             content={formData.content}
             onChange={(content) => setFormData({ ...formData, content })}
