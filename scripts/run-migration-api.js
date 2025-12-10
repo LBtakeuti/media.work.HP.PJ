@@ -1,19 +1,15 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: '.env.local' });
+const { requireEnvVars } = require('./utils/env-loader');
+
+const { SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF } = requireEnvVars([
+  'SUPABASE_ACCESS_TOKEN',
+  'SUPABASE_PROJECT_REF'
+]);
 
 async function runMigration() {
   try {
-    const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
-    const projectRef = process.env.SUPABASE_PROJECT_REF;
-
-    if (!accessToken || !projectRef) {
-      console.error('❌ 環境変数が設定されていません');
-      console.error('   SUPABASE_ACCESS_TOKEN と SUPABASE_PROJECT_REF を .env.local に設定してください');
-      process.exit(1);
-    }
-
     console.log('🔄 マイグレーションを開始します...');
 
     // マイグレーションファイルを読み込む
@@ -30,10 +26,10 @@ async function runMigration() {
     const options = {
       hostname: 'api.supabase.com',
       port: 443,
-      path: `/v1/projects/${projectRef}/database/query`,
+      path: `/v1/projects/${SUPABASE_PROJECT_REF}/database/query`,
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
       }
@@ -69,7 +65,7 @@ async function runMigration() {
     req.end();
 
   } catch (error) {
-    console.error('❌ エラーが発生しました:', error.message);
+    console.error('❌ エラーが発生しました:', error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

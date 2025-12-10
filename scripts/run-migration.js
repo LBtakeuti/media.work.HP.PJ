@@ -1,19 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: '.env.local' });
-
-// Supabaseクライアントを初期化（サービスロールキー使用）
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ 環境変数が設定されていません');
-  console.error('   NEXT_PUBLIC_SUPABASE_URL と SUPABASE_SERVICE_ROLE_KEY を .env.local に設定してください');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// supabaseクライアントは現在未使用だが、将来の拡張のためにインポートを残す
+// const { supabase } = require('./utils/supabase-client');
 
 async function runMigration() {
   try {
@@ -21,7 +9,7 @@ async function runMigration() {
 
     // マイグレーションファイルを読み込む
     const migrationPath = path.join(__dirname, '../supabase/migrations/009_create_category_system.sql');
-    const sql = fs.readFileSync(migrationPath, 'utf8');
+    fs.readFileSync(migrationPath, 'utf8');
 
     console.log('📄 マイグレーションファイルを読み込みました');
 
@@ -33,13 +21,13 @@ async function runMigration() {
     console.log('💡 代わりに、以下の方法でマイグレーションを実行してください:');
     console.log('');
     console.log('1. Supabase Dashboard (https://supabase.com/dashboard) にアクセス');
-    console.log('2. プロジェクト qazyoxligvjsasfqettg を選択');
+    console.log('2. プロジェクトを選択');
     console.log('3. SQL Editor を開く');
     console.log('4. 以下のファイルの内容をコピー&ペースト:');
     console.log('   supabase/migrations/009_create_category_system.sql');
     console.log('');
     console.log('または、PostgreSQL CLIを使用:');
-    console.log('psql -h qazyoxligvjsasfqettg.supabase.co -U postgres -d postgres < supabase/migrations/009_create_category_system.sql');
+    console.log('psql -h <project-ref>.supabase.co -U postgres -d postgres < supabase/migrations/009_create_category_system.sql');
 
   } catch (error) {
     console.error('❌ エラーが発生しました:', error);
