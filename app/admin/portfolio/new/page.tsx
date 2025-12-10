@@ -17,7 +17,6 @@ export default function NewPortfolioPage() {
     title: "",
     description: "",
     youtube_url: "",
-    sort_order: 0,
     published: true,
     display_type: "youtube" as DisplayType,
     category_id: "",
@@ -463,27 +462,6 @@ export default function NewPortfolioPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="説明（任意）"
             />
-          </div>
-
-          <div>
-            <label
-              htmlFor="sort_order"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              表示順序
-            </label>
-            <input
-              type="number"
-              id="sort_order"
-              value={formData.sort_order}
-              onChange={(e) =>
-                setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })
-              }
-              className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              数字が小さいほど先に表示されます
-            </p>
           </div>
 
           <div className="flex items-center">
