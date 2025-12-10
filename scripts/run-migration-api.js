@@ -1,11 +1,18 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: '.env.local' });
 
 async function runMigration() {
   try {
-    const accessToken = process.env.SUPABASE_ACCESS_TOKEN || 'sbp_639ad1736525eae71ea66b10fdb1b20022864e56';
-    const projectRef = 'qazyoxligvjsasfqettg';
+    const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
+    const projectRef = process.env.SUPABASE_PROJECT_REF;
+
+    if (!accessToken || !projectRef) {
+      console.error('❌ 環境変数が設定されていません');
+      console.error('   SUPABASE_ACCESS_TOKEN と SUPABASE_PROJECT_REF を .env.local に設定してください');
+      process.exit(1);
+    }
 
     console.log('🔄 マイグレーションを開始します...');
 

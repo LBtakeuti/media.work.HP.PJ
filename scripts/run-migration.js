@@ -1,10 +1,17 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: '.env.local' });
 
 // Supabaseクライアントを初期化（サービスロールキー使用）
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qazyoxligvjsasfqettg.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhenlveGxpZ3Zqc2FzZnFldHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzYzMDM4OSwiZXhwIjoyMDc5MjA2Mzg5fQ.pnhr7w53SyH9HNQEKJ8myCd8Qi9nHCjHQnXYoLEbVmc';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ 環境変数が設定されていません');
+  console.error('   NEXT_PUBLIC_SUPABASE_URL と SUPABASE_SERVICE_ROLE_KEY を .env.local に設定してください');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
