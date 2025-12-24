@@ -3,7 +3,7 @@
   "version": 2,
   "rewrites": [
     {
-      "source": ":path*",
+      "source": "/savreqgolflp/:path*",
       "destination": "https://savreqgolflp.vercel.app/:path*"
     }
   ]
