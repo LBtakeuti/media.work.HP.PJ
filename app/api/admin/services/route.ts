@@ -75,12 +75,27 @@ export async function POST(request: Request) {
     const slug = `service-${maxNumber + 1}`;
 
     const { categories, ...dbService } = body;
-    
+
+    // 既存のサービスのsort_orderを全て+1して、新規サービスを先頭に配置
+    const { data: existingServiceItems } = await supabase
+      .from('services')
+      .select('id, sort_order');
+
+    if (existingServiceItems && existingServiceItems.length > 0) {
+      for (const item of existingServiceItems) {
+        await supabase
+          .from('services')
+          .update({ sort_order: (item.sort_order ?? 0) + 1 })
+          .eq('id', item.id);
+      }
+    }
+
     const serviceData = {
       ...dbService,
       slug,
       published: true,
       published_at: new Date().toISOString(),
+      sort_order: 0,  // 新規サービスは先頭に配置
     };
 
     const { data: newService, error } = await supabase

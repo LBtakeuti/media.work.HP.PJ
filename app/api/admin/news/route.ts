@@ -22,11 +22,11 @@ export async function GET() {
   try {
     const supabase = getSupabase();
     
-    // まずニュース一覧を取得
+    // まずニュース一覧を取得（sort_orderで並べ替え）
     const { data: news, error } = await supabase
       .from('news')
       .select('*')
-      .order('updated_at', { ascending: false });
+      .order('sort_order', { ascending: true });
 
     if (error) {
       console.error('Error fetching news:', error);
@@ -114,12 +114,27 @@ export async function POST(request: Request) {
     const slug = `news-${maxNumber + 1}`;
 
     const { categories, ...dbNews } = body;
-    
+
+    // 既存のニュースのsort_orderを全て+1して、新規ニュースを先頭に配置
+    const { data: existingNewsItems } = await supabase
+      .from('news')
+      .select('id, sort_order');
+
+    if (existingNewsItems && existingNewsItems.length > 0) {
+      for (const item of existingNewsItems) {
+        await supabase
+          .from('news')
+          .update({ sort_order: (item.sort_order ?? 0) + 1 })
+          .eq('id', item.id);
+      }
+    }
+
     const newsData = {
       ...dbNews,
       slug,
       published: true,
       published_at: new Date().toISOString(),
+      sort_order: 0,  // 新規ニュースは先頭に配置
     };
 
     const { data: newNews, error } = await supabase

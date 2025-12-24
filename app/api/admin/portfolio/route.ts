@@ -48,11 +48,26 @@ export async function POST(request: Request) {
       }
     }
 
+    // 既存のポートフォリオのsort_orderを全て+1して、新規を先頭に配置
+    const supabase = getSupabaseAdmin();
+    const { data: existingPortfolios } = await supabase
+      .from('portfolios')
+      .select('id, sort_order');
+
+    if (existingPortfolios && existingPortfolios.length > 0) {
+      for (const item of existingPortfolios) {
+        await supabase
+          .from('portfolios')
+          .update({ sort_order: (item.sort_order ?? 0) + 1 })
+          .eq('id', item.id);
+      }
+    }
+
     // データベースに保存するデータを準備
     const portfolioData: any = {
       title: body.title,
       description: body.description || null,
-      sort_order: body.sort_order || 0,
+      sort_order: 0,  // 新規ポートフォリオは先頭に配置
       published: body.published ?? true,
       display_type: displayType,
       reference_url: body.reference_url || null,

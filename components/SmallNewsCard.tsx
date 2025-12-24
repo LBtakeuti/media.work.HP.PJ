@@ -12,7 +12,7 @@ export default function SmallNewsCard({ item }: SmallNewsCardProps) {
   return (
     <Link
       href={`/news/${item.slug || item.id}`}
-      className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 cursor-pointer h-full"
+      className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 cursor-pointer h-full flex flex-col"
     >
       {/* Image Section */}
       <div className="relative h-32 bg-gray-100 group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 overflow-hidden">
@@ -36,7 +36,7 @@ export default function SmallNewsCard({ item }: SmallNewsCardProps) {
       </div>
       
       {/* Content Section */}
-      <div className="p-3 bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200">
+      <div className="p-3 bg-white group-hover:bg-[#E6E6E6] group-active:bg-[#E6E6E6] transition-colors duration-200 flex-1 flex flex-col">
         <div className="text-xs text-gray-500 mb-1">
           {format(new Date(item.date), "yyyy年MM月dd日", {
             locale: ja,
@@ -54,7 +54,7 @@ export default function SmallNewsCard({ item }: SmallNewsCardProps) {
         <h3 className="text-sm font-bold text-gray-900 leading-tight mb-1 line-clamp-2">
           {item.title}
         </h3>
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-auto">
           <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
