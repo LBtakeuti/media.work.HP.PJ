@@ -1,0 +1,2 @@
+public/savreqgolflp/img/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/savreqgolflp/img/*.png filter=lfs diff=lfs merge=lfs -text
