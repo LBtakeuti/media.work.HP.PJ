@@ -27,12 +27,7 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-};
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // 既存の設定があればそのまま残す
-  
+  // リライト設定（savreqgolflpサブディレクトリのプロキシ）
   async rewrites() {
     return [
       {
