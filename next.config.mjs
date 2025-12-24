@@ -27,15 +27,7 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // リライト設定（savreqgolflpサブディレクトリのプロキシ）
-  async rewrites() {
-    return [
-      {
-        source: '/savreqgolflp/:path*',
-        destination: 'https://savreqgolflp-q4kcpda3i-media-work.vercel.app/:path*',
-      },
-    ];
-  },
+  // savreqgolflpはpublicフォルダに配置済み
 };
 
 export default nextConfig;

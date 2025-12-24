@@ -1,0 +1,50 @@
+/* デバッグ用CSS - 問題特定後に削除 */
+
+/* 各セクションに目立つ境界線を追加 */
+section {
+    border: 5px solid red !important;
+    margin: 10px 0 !important;
+}
+
+.hero-section {
+    border-color: blue !important;
+}
+
+.features-section {
+    border-color: green !important;
+}
+
+.system-section {
+    border-color: purple !important;
+}
+
+.tech-section {
+    border-color: orange !important;
+}
+
+.flow-section {
+    border-color: pink !important;
+}
+
+.notice-section {
+    border-color: yellow !important;
+}
+
+.contact-section {
+    border-color: cyan !important;
+}
+
+/* すべての疑似要素を一時的に無効化 */
+*::before,
+*::after {
+    display: none !important;
+}
+
+/* すべてのpositionを一時的にstaticに */
+/* .hero-overlay,
+.features-section::before,
+.system-section::before,
+.tech-section::before,
+.contact-section::before {
+    position: static !important;
+} */
