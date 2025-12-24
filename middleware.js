@@ -32,14 +32,29 @@ export async function middleware(request) {
           : undefined,
       });
 
-      // レスポンスを構築
-      const responseBody = await response.text();
+      // レスポンスを構築（バイナリファイルにも対応）
+      const contentType = response.headers.get('content-type') || '';
+      const isBinary = contentType.startsWith('image/') || 
+                       contentType.startsWith('application/') ||
+                       contentType.startsWith('font/') ||
+                       contentType.startsWith('video/') ||
+                       contentType.startsWith('audio/');
+      
+      const responseBody = isBinary 
+        ? await response.arrayBuffer()
+        : await response.text();
+      
       const headers = new Headers(response.headers);
       
       // CORSヘッダーを設定
       headers.set('Access-Control-Allow-Origin', '*');
       headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       headers.set('Access-Control-Allow-Headers', 'Content-Type');
+      
+      // キャッシュヘッダーを設定（静的アセット用）
+      if (isBinary || contentType.includes('css') || contentType.includes('javascript')) {
+        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+      }
 
       return new NextResponse(responseBody, {
         status: response.status,
