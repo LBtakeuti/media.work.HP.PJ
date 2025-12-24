@@ -27,7 +27,15 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // リライト設定は middleware.js で処理
+  // リライト設定（savreqgolflpサブディレクトリのプロキシ）
+  async rewrites() {
+    return [
+      {
+        source: '/savreqgolflp/:path*',
+        destination: 'https://savreqgolflp-q4kcpda3i-media-work.vercel.app/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
