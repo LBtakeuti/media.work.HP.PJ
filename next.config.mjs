@@ -29,4 +29,19 @@ const nextConfig = {
   },
 };
 
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // 既存の設定があればそのまま残す
+  
+  async rewrites() {
+    return [
+      {
+        source: '/savreqgolflp/:path*',
+        destination: 'https://savreqgolflp-q4kcpda3i-media-work.vercel.app/:path*',
+      },
+    ];
+  },
+};
+
 export default nextConfig;
+
