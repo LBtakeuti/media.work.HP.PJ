@@ -174,10 +174,8 @@ export async function POST(request: NextRequest) {
       message,
     });
 
-    // Slackに通知を送信（非同期で実行、エラーが発生しても処理を続行）
-    sendSlackNotification({ name, company, email, subject, message }).catch((error) => {
-      console.error('Slack notification failed:', error);
-    });
+    // Slackに通知を送信（Vercelでは非同期処理が打ち切られるためawaitが必要）
+    await sendSlackNotification({ name, company, email, subject, message });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
