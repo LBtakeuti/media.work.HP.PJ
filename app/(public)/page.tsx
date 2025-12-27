@@ -108,6 +108,11 @@ export default async function Home() {
               ビジネスの成長と成功に貢献します。
             </p>
           </div>
+          <div className="text-[14px] text-center space-y-1 mt-12" style={{ color: '#FD8882' }}>
+            <p>当社は、Reds Business Clubのメンバーです。</p>
+            <p>当社は、葛飾区からJリーグを目指す南葛SCを応援しています。</p>
+            <p>当社は、ジョイフル本田つくばFC・関口訓充選手の個人パートナーです。</p>
+          </div>
         </div>
         {/* Gradient transition to Services Section */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
