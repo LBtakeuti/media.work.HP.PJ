@@ -3,7 +3,8 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import PortfolioGrid from "./PortfolioGrid";
 
-export const dynamic = "force-dynamic";
+// ISR: 60秒間キャッシュし、バックグラウンドで再生成
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "ポートフォリオ | 株式会社メディア・ワーク",
@@ -16,8 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortfolioPage() {
-  const portfolios = await getPublishedPortfolios();
-  const categories = await getPortfolioCategories();
+  const [portfolios, categories] = await Promise.all([getPublishedPortfolios(), getPortfolioCategories()]);
 
   return (
     <div className="bg-white">

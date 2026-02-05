@@ -9,8 +9,8 @@ import AnimatedTitle from "@/components/AnimatedTitle";
 import AnimatedSectionTitle from "@/components/AnimatedSectionTitle";
 import type { Metadata } from "next";
 
-// キャッシュを無効化し、毎回最新データを取得
-export const dynamic = 'force-dynamic';
+// ISR: 60秒間キャッシュし、バックグラウンドで再生成
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "株式会社メディア・ワーク",
@@ -23,9 +23,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const newsItems = await getNews();
+  const [newsItems, services] = await Promise.all([getNews(), getServices()]);
   const latestNews = newsItems.slice(0, 4); // 最新4件を表示
-  const services = await getServices();
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -49,7 +48,7 @@ export default async function Home() {
             <AnimatedTitle
               text="心に残る瞬間を、|未来に届ける。"
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg"
-              highlightColor="text-[#393D45]"
+              highlightColor="#393D45"
               duration={2000}
             />
             <p className="text-2xl text-white max-w-3xl mx-auto drop-shadow-md">

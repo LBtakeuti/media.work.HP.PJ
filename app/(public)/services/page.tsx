@@ -5,8 +5,8 @@ import { getServices, getServiceCategories } from "@/lib/supabase-data";
 import type { Metadata } from "next";
 import Pagination from "@/components/Pagination";
 
-// キャッシュを無効化し、毎回最新データを取得
-export const dynamic = 'force-dynamic';
+// ISR: 60秒間キャッシュし、バックグラウンドで再生成
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "サービス | 株式会社メディア・ワーク",
@@ -25,8 +25,7 @@ export default async function ServicesPage({
 }: {
   searchParams: { category?: string; page?: string };
 }) {
-  const allServices = await getServices();
-  const categories = await getServiceCategories();
+  const [allServices, categories] = await Promise.all([getServices(), getServiceCategories()]);
 
   // Filter by category if specified
   const selectedCategory = searchParams.category;

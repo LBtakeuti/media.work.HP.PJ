@@ -7,8 +7,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import Pagination from "@/components/Pagination";
 
-// キャッシュを無効化し、毎回最新データを取得
-export const dynamic = 'force-dynamic';
+// ISR: 60秒間キャッシュし、バックグラウンドで再生成
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "ニュース | 株式会社メディア・ワーク",
@@ -27,8 +27,7 @@ export default async function NewsPage({
 }: {
   searchParams: { category?: string; page?: string };
 }) {
-  const allNews = await getNews();
-  const categories = await getNewsCategories();
+  const [allNews, categories] = await Promise.all([getNews(), getNewsCategories()]);
 
   // Filter by category if specified
   const selectedCategory = searchParams.category;

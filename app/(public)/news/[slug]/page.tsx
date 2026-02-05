@@ -1,12 +1,20 @@
-import { getNewsBySlug } from "@/lib/supabase-data";
+import { getNewsBySlug, getNews } from "@/lib/supabase-data";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
-// キャッシュを無効化し、毎回最新データを取得
-export const dynamic = 'force-dynamic';
+// ISR: 60秒間キャッシュし、バックグラウンドで再生成
+export const revalidate = 60;
+
+// ビルド時に既存のニュース記事をプリレンダリング
+export async function generateStaticParams() {
+  const news = await getNews();
+  return news
+    .filter((item) => item.slug)
+    .map((item) => ({ slug: item.slug! }));
+}
 
 export default async function NewsDetailPage({
   params,

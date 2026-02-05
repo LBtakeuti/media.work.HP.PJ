@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface AnimatedGridPatternProps {
@@ -42,7 +41,6 @@ export function AnimatedGridPattern({
     ];
   }
 
-  // Adjust the generateSquares function to return objects with an id, x, and y
   function generateSquares(count: number) {
     return Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -50,7 +48,6 @@ export function AnimatedGridPattern({
     }));
   }
 
-  // Function to update a single square's position
   const updateSquarePosition = (id: number) => {
     setSquares((currentSquares) =>
       currentSquares.map((sq) =>
@@ -64,17 +61,15 @@ export function AnimatedGridPattern({
     );
   };
 
-  // Update squares to animate in
   useEffect(() => {
     if (dimensions.width && dimensions.height) {
       setSquares(generateSquares(numSquares));
     }
   }, [dimensions, numSquares]);
 
-  // Resize observer to update container dimensions
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setDimensions({
           width: entry.contentRect.width,
           height: entry.contentRect.height,
@@ -93,6 +88,13 @@ export function AnimatedGridPattern({
     };
   }, [containerRef]);
 
+  const animationStyle = `
+    @keyframes gridFade {
+      0%, 100% { opacity: 0; }
+      50% { opacity: var(--max-opacity); }
+    }
+  `;
+
   return (
     <svg
       ref={containerRef}
@@ -103,6 +105,7 @@ export function AnimatedGridPattern({
       )}
       {...props}
     >
+      <style>{animationStyle}</style>
       <defs>
         <pattern
           id={id}
@@ -121,30 +124,24 @@ export function AnimatedGridPattern({
       </defs>
       <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
-        {squares.map(({ pos: [x, y], id }, index) => (
-          <motion.rect
-            initial={{ opacity: 0 }}
-            animate={{ opacity: maxOpacity }}
-            transition={{
-              duration,
-              repeat: 1,
-              delay: index * 0.1,
-              repeatType: "reverse",
-            }}
-            onAnimationComplete={() => updateSquarePosition(id)}
-            key={`${x}-${y}-${index}`}
+        {squares.map(({ pos: [sx, sy], id: sqId }, index) => (
+          <rect
+            key={`${sx}-${sy}-${index}`}
             width={width - 1}
             height={height - 1}
-            x={x * width + 1}
-            y={y * height + 1}
+            x={sx * width + 1}
+            y={sy * height + 1}
             fill="currentColor"
             strokeWidth="0"
+            style={{
+              "--max-opacity": maxOpacity,
+              opacity: 0,
+              animation: `gridFade ${duration * 2}s ease-in-out ${index * 0.1}s infinite`,
+              animationFillMode: "both",
+            } as React.CSSProperties}
           />
         ))}
       </svg>
     </svg>
   );
 }
-
-
-

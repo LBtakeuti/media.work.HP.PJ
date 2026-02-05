@@ -16,6 +16,9 @@ export default function AnimatedSectionTitle({
   const lineRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
@@ -26,40 +29,30 @@ export default function AnimatedSectionTitle({
       }
     );
 
-    if (titleRef.current) {
-      observer.observe(titleRef.current);
-    }
-
-    return () => {
-      if (titleRef.current) {
-        observer.unobserve(titleRef.current);
-      }
-    };
+    observer.observe(el);
+    return () => observer.unobserve(el);
   }, []);
 
-  // ラインの幅を計算（英語部分まで含める）
+  // ラインの幅を計算（ResizeObserverで要素サイズ変更を監視）
   useEffect(() => {
+    const titleEl = titleRef.current;
+    const lineEl = lineRef.current;
+    if (!titleEl || !lineEl) return;
+
     const updateLineWidth = () => {
-      if (titleRef.current && lineRef.current) {
-        if (isVisible) {
-          // requestAnimationFrameでDOM更新後に幅を取得
-          requestAnimationFrame(() => {
-            if (titleRef.current && lineRef.current) {
-              const fullWidth = titleRef.current.offsetWidth;
-              lineRef.current.style.width = `${fullWidth}px`;
-            }
-          });
-        } else {
-          lineRef.current.style.width = "0px";
-        }
+      if (isVisible) {
+        lineEl.style.width = `${titleEl.offsetWidth}px`;
+      } else {
+        lineEl.style.width = "0px";
       }
     };
 
     updateLineWidth();
 
-    // リサイズ時にも更新
-    window.addEventListener("resize", updateLineWidth);
-    return () => window.removeEventListener("resize", updateLineWidth);
+    const resizeObserver = new ResizeObserver(updateLineWidth);
+    resizeObserver.observe(titleEl);
+
+    return () => resizeObserver.disconnect();
   }, [isVisible]);
 
   return (

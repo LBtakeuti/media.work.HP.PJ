@@ -1,5 +1,4 @@
 import { getSupabaseAdmin } from './supabase-admin';
-import { unstable_noStore as noStore } from 'next/cache';
 
 // サーバーサイドでのデータ取得にはサービスロールキーを使用
 // （RLSをバイパスして全てのデータにアクセス可能）
@@ -68,7 +67,7 @@ export interface Category {
 // ============================================
 
 export async function getNewsCategories(): Promise<Category[]> {
-  noStore(); // キャッシュを無効化
+
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('news_categories')
@@ -77,7 +76,7 @@ export async function getNewsCategories(): Promise<Category[]> {
 
   if (error) {
     console.error('Error fetching news categories:', error);
-    throw error;
+    return [];
   }
 
   return data || [];
@@ -134,7 +133,7 @@ export async function deleteNewsCategory(id: string): Promise<void> {
 // ============================================
 
 export async function getServiceCategories(): Promise<Category[]> {
-  noStore(); // キャッシュを無効化
+
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('service_categories')
@@ -143,7 +142,7 @@ export async function getServiceCategories(): Promise<Category[]> {
 
   if (error) {
     console.error('Error fetching service categories:', error);
-    throw error;
+    return [];
   }
 
   return data || [];
@@ -200,7 +199,7 @@ export async function deleteServiceCategory(id: string): Promise<void> {
 // ============================================
 
 export async function getNews(): Promise<NewsItem[]> {
-  noStore(); // キャッシュを無効化
+
   const supabase = getSupabase();
 
   // JOINクエリで一度に全データを取得（N+1問題を解消）
@@ -223,7 +222,7 @@ export async function getNews(): Promise<NewsItem[]> {
       hint: error.hint,
       code: error.code,
     });
-    throw new Error(`Failed to fetch news: ${error.message} (code: ${error.code})`);
+    return [];
   }
 
   // カテゴリ名を配列に変換
@@ -477,7 +476,7 @@ export async function deleteNews(id: string): Promise<void> {
 // ============================================
 
 export async function getServices(): Promise<ServiceItem[]> {
-  noStore(); // キャッシュを無効化
+
   const supabase = getSupabase();
 
   // JOINクエリで一度に全データを取得（N+1問題を解消）
@@ -500,7 +499,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       hint: error.hint,
       code: error.code,
     });
-    throw new Error(`Failed to fetch services: ${error.message} (code: ${error.code})`);
+    return [];
   }
 
   // カテゴリ名を配列に変換
@@ -591,7 +590,7 @@ export async function getServiceById(id: string): Promise<ServiceItem | null> {
 }
 
 export async function getServiceBySlug(slug: string): Promise<ServiceItem | null> {
-  noStore(); // キャッシュを無効化
+
   const supabase = getSupabase();
 
   // まずslugで検索
@@ -866,7 +865,7 @@ export interface PortfolioItem {
 }
 
 export async function getPortfolios(): Promise<PortfolioItem[]> {
-  noStore();
+
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('portfolios')
@@ -880,7 +879,7 @@ export async function getPortfolios(): Promise<PortfolioItem[]> {
 
   if (error) {
     console.error('Error fetching portfolios:', error);
-    throw error;
+    return [];
   }
 
   // リレーションからカテゴリを抽出して整形
@@ -900,7 +899,7 @@ export async function getPortfolios(): Promise<PortfolioItem[]> {
 }
 
 export async function getPublishedPortfolios(): Promise<PortfolioItem[]> {
-  noStore();
+
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('portfolios')
@@ -915,7 +914,7 @@ export async function getPublishedPortfolios(): Promise<PortfolioItem[]> {
 
   if (error) {
     console.error('Error fetching published portfolios:', error);
-    throw error;
+    return [];
   }
 
   // リレーションからカテゴリを抽出して整形
@@ -1010,7 +1009,7 @@ export async function deletePortfolio(id: string): Promise<void> {
 }
 
 export async function getPortfolioCategories(): Promise<PortfolioCategory[]> {
-  noStore();
+
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from('portfolio_categories')
