@@ -1,9 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
-import ServiceCard from "@/components/ServiceCard";
 import { getServices, getServiceCategories } from "@/lib/supabase-data";
 import type { Metadata } from "next";
-import Pagination from "@/components/Pagination";
+import ServicesGrid from "./ServicesGrid";
 
 // ISR: 60秒間キャッシュし、バックグラウンドで再生成
 export const revalidate = 60;
@@ -18,27 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
-const ITEMS_PER_PAGE = 6;
-
-export default async function ServicesPage({
-  searchParams,
-}: {
-  searchParams: { category?: string; page?: string };
-}) {
+export default async function ServicesPage() {
   const [allServices, categories] = await Promise.all([getServices(), getServiceCategories()]);
-
-  // Filter by category if specified
-  const selectedCategory = searchParams.category;
-  const filteredServices = selectedCategory
-    ? allServices.filter(item => item.categories?.includes(selectedCategory))
-    : allServices;
-
-  // Pagination
-  const currentPage = Number.parseInt(searchParams.page || "1", 10);
-  const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const services = filteredServices.slice(startIndex, endIndex);
 
   return (
     <div className="bg-white">
@@ -57,7 +36,7 @@ export default async function ServicesPage({
         </div>
         {/* Overlay for text readability */}
         <div className="absolute inset-0 bg-black/20 z-[1]"></div>
-        
+
         <div className="relative z-10 h-full flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
@@ -70,92 +49,7 @@ export default async function ServicesPage({
         </div>
       </section>
 
-      {/* Category Filter */}
-      {categories.length > 0 && (
-        <section className="py-8 bg-gray-50 border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
-              <span className="text-sm font-medium text-gray-600">カテゴリで絞り込み:</span>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/services"
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    !selectedCategory
-                      ? "bg-primary-600 text-white shadow-md"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                  }`}
-                >
-                  すべて
-                </Link>
-                {categories.map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/services?category=${encodeURIComponent(category.name)}`}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      selectedCategory === category.name
-                        ? "text-white shadow-md"
-                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                    }`}
-                    style={selectedCategory === category.name ? { backgroundColor: category.color } : {}}
-                  >
-                    {category.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Services List */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {selectedCategory && (
-            <div className="mb-8">
-              <p className="text-gray-600">
-                「<span className="font-medium">{selectedCategory}</span>」のサービスを表示中
-                <Link href="/services" className="ml-2 text-primary-600 hover:underline text-sm">
-                  フィルターを解除
-                </Link>
-              </p>
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
-            {services.length === 0 ? (
-              <div className="col-span-full text-center py-12">
-                <p className="text-gray-500 text-lg">
-                  {selectedCategory
-                    ? `「${selectedCategory}」カテゴリのサービスはありません。`
-                    : "サービスはありません。"
-                  }
-                </p>
-              </div>
-            ) : (
-              services.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  imageSrc={service.image}
-                  categories={service.categories}
-                  title={service.title}
-                  description={service.description}
-                  href={`/services/${service.slug || service.id}`}
-                  imageDisplayMode={service.image_display_mode}
-                />
-              ))
-            )}
-          </div>
-
-          {/* Pagination */}
-          {filteredServices.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              baseUrl="/services"
-            />
-          )}
-        </div>
-      </section>
-
+      <ServicesGrid services={allServices} categories={categories} />
     </div>
   );
 }
