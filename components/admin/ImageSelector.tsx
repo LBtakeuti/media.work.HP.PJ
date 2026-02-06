@@ -12,6 +12,7 @@ export default function ImageSelector({ value, onChange }: ImageSelectorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string>(value);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -27,27 +28,47 @@ export default function ImageSelector({ value, onChange }: ImageSelectorProps) {
       return;
     }
 
-    // ファイルサイズチェック（5MB制限）
-    if (file.size > 5 * 1024 * 1024) {
-      alert("ファイルサイズは5MB以下にしてください");
+    // ファイルサイズチェック（10MB制限）
+    if (file.size > 10 * 1024 * 1024) {
+      alert("ファイルサイズは10MB以下にしてください");
       return;
     }
 
     setIsUploading(true);
+    setUploadError(null);
 
     try {
-      // ローカルプレビュー用のData URLを作成
+      // Supabase Storageにアップロード
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "アップロードに失敗しました");
+      }
+
+      // アップロード成功 - URLを使用
+      setPreview(result.url);
+      onChange(result.url);
+    } catch (error) {
+      console.error("画像のアップロードに失敗しました:", error);
+      setUploadError(error instanceof Error ? error.message : "アップロードに失敗しました");
+
+      // フォールバック: base64として保存（Storageが使えない場合）
       const reader = new FileReader();
       reader.onload = (e) => {
         const dataUrl = e.target?.result as string;
         setPreview(dataUrl);
         onChange(dataUrl);
-        setIsUploading(false);
       };
       reader.readAsDataURL(file);
-    } catch (error) {
-      console.error("画像の読み込みに失敗しました:", error);
-      alert("画像の読み込みに失敗しました");
+    } finally {
       setIsUploading(false);
     }
   };
@@ -85,25 +106,42 @@ export default function ImageSelector({ value, onChange }: ImageSelectorProps) {
           </svg>
           <div className="text-center">
             <p className="text-sm font-medium text-gray-700">
-              {isUploading ? "読み込み中..." : "クリックして画像を選択"}
+              {isUploading ? "アップロード中..." : "クリックして画像を選択"}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              PNG, JPG, GIF, WEBP, AVIF（最大5MB）
+              PNG, JPG, GIF, WEBP（最大10MB）
             </p>
           </div>
         </div>
       </button>
 
+      {/* Upload Error */}
+      {uploadError && (
+        <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <p className="font-medium">Storage未設定のため、従来の方式で保存されます</p>
+          <p className="text-xs mt-1">{uploadError}</p>
+        </div>
+      )}
+
       {/* Preview */}
       {preview && (
         <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-700">プレビュー</p>
+            <div>
+              <p className="text-sm font-medium text-gray-700">プレビュー</p>
+              {preview.startsWith('http') && (
+                <p className="text-xs text-green-600">✓ Storageに保存済み</p>
+              )}
+              {preview.startsWith('data:') && (
+                <p className="text-xs text-amber-600">⚠ Base64（大容量）</p>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => {
                 setPreview("");
                 onChange("");
+                setUploadError(null);
                 if (fileInputRef.current) {
                   fileInputRef.current.value = "";
                 }
@@ -119,7 +157,7 @@ export default function ImageSelector({ value, onChange }: ImageSelectorProps) {
               alt="プレビュー"
               fill
               className="object-contain"
-              unoptimized
+              unoptimized={preview.startsWith('data:')}
             />
           </div>
         </div>
@@ -127,4 +165,3 @@ export default function ImageSelector({ value, onChange }: ImageSelectorProps) {
     </div>
   );
 }
-
