@@ -241,6 +241,22 @@ export async function getNews(): Promise<NewsItem[]> {
   return newsWithCategories;
 }
 
+// generateStaticParams用: slugのみ取得（軽量）
+export async function getNewsSlugs(): Promise<{ slug: string }[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('news')
+    .select('slug')
+    .not('slug', 'is', null);
+
+  if (error) {
+    console.error('Error fetching news slugs:', error);
+    return [];
+  }
+
+  return (data || []).filter(item => item.slug) as { slug: string }[];
+}
+
 export async function getNewsByCategory(categorySlug: string): Promise<NewsItem[]> {
   const supabase = getSupabase();
   
@@ -516,6 +532,22 @@ export async function getServices(): Promise<ServiceItem[]> {
   });
 
   return servicesWithCategories;
+}
+
+// generateStaticParams用: slugのみ取得（軽量）
+export async function getServiceSlugs(): Promise<{ slug: string }[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('services')
+    .select('slug')
+    .not('slug', 'is', null);
+
+  if (error) {
+    console.error('Error fetching service slugs:', error);
+    return [];
+  }
+
+  return (data || []).filter(item => item.slug) as { slug: string }[];
 }
 
 export async function getServicesByCategory(categorySlug: string): Promise<ServiceItem[]> {

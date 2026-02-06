@@ -1,4 +1,4 @@
-import { getServiceBySlug, getServices } from "@/lib/supabase-data";
+import { getServiceBySlug, getServiceSlugs } from "@/lib/supabase-data";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,12 +6,10 @@ import { notFound } from "next/navigation";
 // ISR: 60秒間キャッシュし、バックグラウンドで再生成
 export const revalidate = 60;
 
-// ビルド時に既存のサービスページをプリレンダリング
+// ビルド時に既存のサービスページをプリレンダリング（軽量なslugのみ取得）
 export async function generateStaticParams() {
-  const services = await getServices();
-  return services
-    .filter((item) => item.slug)
-    .map((item) => ({ slug: item.slug! }));
+  const slugs = await getServiceSlugs();
+  return slugs.map((item) => ({ slug: item.slug }));
 }
 
 export default async function ServiceDetailPage({
