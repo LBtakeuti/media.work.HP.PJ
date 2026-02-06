@@ -239,8 +239,13 @@ export async function getNewsForList(): Promise<NewsItem[]> {
       .filter(Boolean) || [];
 
     const { news_category_relations, ...newsItem } = item;
+
+    // base64画像は一覧では除外（サイズ削減）
+    const image = newsItem.image?.startsWith('data:') ? undefined : newsItem.image;
+
     return {
       ...newsItem,
+      image,
       content: '', // 一覧では不要
       categories
     } as NewsItem;
@@ -586,8 +591,13 @@ export async function getServicesForList(): Promise<ServiceItem[]> {
       .filter(Boolean) || [];
 
     const { service_category_relations, ...serviceItem } = item;
+
+    // base64画像は一覧では除外（サイズ削減）
+    const image = serviceItem.image?.startsWith('data:') ? undefined : serviceItem.image;
+
     return {
       ...serviceItem,
+      image,
       content: '', // 一覧では不要
       categories
     } as ServiceItem;
