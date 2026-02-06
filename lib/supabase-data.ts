@@ -592,12 +592,8 @@ export async function getServicesForList(): Promise<ServiceItem[]> {
 
     const { service_category_relations, ...serviceItem } = item;
 
-    // base64画像は一覧では除外（サイズ削減）
-    const image = serviceItem.image?.startsWith('data:') ? undefined : serviceItem.image;
-
     return {
       ...serviceItem,
-      image,
       content: '', // 一覧では不要
       categories
     } as ServiceItem;
