@@ -9,7 +9,6 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "serena",
-    "supabase"
+    "serena"
   ]
 }

@@ -3,8 +3,8 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import NewsGrid from "./NewsGrid";
 
-// 動的レンダリング（ISRサイズ制限回避のため）
-export const dynamic = 'force-dynamic';
+// ISR: 60秒間キャッシュし、バックグラウンドで再生成
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "ニュース | 株式会社メディア・ワーク",
