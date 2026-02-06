@@ -1,4 +1,4 @@
-import { getNews, getNewsCategories } from "@/lib/supabase-data";
+import { getNewsForList, getNewsCategories } from "@/lib/supabase-data";
 import Image from "next/image";
 import type { Metadata } from "next";
 import NewsGrid from "./NewsGrid";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsPage() {
-  const [allNews, categories] = await Promise.all([getNews(), getNewsCategories()]);
+  const [allNews, categories] = await Promise.all([getNewsForList(), getNewsCategories()]);
 
   return (
     <div className="bg-white">

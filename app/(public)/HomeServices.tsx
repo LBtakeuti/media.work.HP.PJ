@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { getServices } from "@/lib/supabase-data";
+import { getServicesForList } from "@/lib/supabase-data";
 import ServiceCard from "@/components/ServiceCard";
 import AnimatedSectionTitle from "@/components/AnimatedSectionTitle";
 
 export default async function HomeServices() {
-  const services = await getServices();
+  const services = await getServicesForList();
 
   const fullRows = Math.floor(services.length / 4);
   const topServices = services.slice(0, fullRows * 4);

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { getNews } from "@/lib/supabase-data";
+import { getNewsForList } from "@/lib/supabase-data";
 import SmallNewsCard from "@/components/SmallNewsCard";
 import AnimatedSectionTitle from "@/components/AnimatedSectionTitle";
 
 export default async function HomeNews() {
-  const newsItems = await getNews();
+  const newsItems = await getNewsForList();
   const latestNews = newsItems.slice(0, 4);
 
   return (

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getServices, getServiceCategories } from "@/lib/supabase-data";
+import { getServicesForList, getServiceCategories } from "@/lib/supabase-data";
 import type { Metadata } from "next";
 import ServicesGrid from "./ServicesGrid";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ServicesPage() {
-  const [allServices, categories] = await Promise.all([getServices(), getServiceCategories()]);
+  const [allServices, categories] = await Promise.all([getServicesForList(), getServiceCategories()]);
 
   return (
     <div className="bg-white">

@@ -198,6 +198,58 @@ export async function deleteServiceCategory(id: string): Promise<void> {
 // ニュース関連（最適化済み - JOINクエリ使用）
 // ============================================
 
+// 一覧表示用: contentを除外した軽量版（ISRサイズ制限対策）
+export async function getNewsForList(): Promise<NewsItem[]> {
+  const supabase = getSupabase();
+
+  const { data, error } = await supabase
+    .from('news')
+    .select(`
+      id,
+      title,
+      slug,
+      summary,
+      image,
+      image_display_mode,
+      date,
+      published,
+      published_at,
+      sort_order,
+      news_category_relations (
+        news_categories (
+          name
+        )
+      )
+    `)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching news for list:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
+    return [];
+  }
+
+  const newsWithCategories = (data || []).map(item => {
+    const categories = item.news_category_relations
+      ?.map((rel: any) => rel.news_categories?.name)
+      .filter(Boolean) || [];
+
+    const { news_category_relations, ...newsItem } = item;
+    return {
+      ...newsItem,
+      content: '', // 一覧では不要
+      categories
+    } as NewsItem;
+  });
+
+  return newsWithCategories;
+}
+
+// 全フィールド取得（詳細ページ・管理画面用）
 export async function getNews(): Promise<NewsItem[]> {
 
   const supabase = getSupabase();
@@ -491,6 +543,60 @@ export async function deleteNews(id: string): Promise<void> {
 // サービス関連（最適化済み - JOINクエリ使用）
 // ============================================
 
+// 一覧表示用: contentを除外した軽量版（ISRサイズ制限対策）
+export async function getServicesForList(): Promise<ServiceItem[]> {
+  const supabase = getSupabase();
+
+  const { data, error } = await supabase
+    .from('services')
+    .select(`
+      id,
+      title,
+      slug,
+      description,
+      summary,
+      image,
+      image_display_mode,
+      icon,
+      featured,
+      sort_order,
+      published,
+      published_at,
+      service_category_relations (
+        service_categories (
+          name
+        )
+      )
+    `)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching services for list:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
+    return [];
+  }
+
+  const servicesWithCategories = (data || []).map(item => {
+    const categories = item.service_category_relations
+      ?.map((rel: any) => rel.service_categories?.name)
+      .filter(Boolean) || [];
+
+    const { service_category_relations, ...serviceItem } = item;
+    return {
+      ...serviceItem,
+      content: '', // 一覧では不要
+      categories
+    } as ServiceItem;
+  });
+
+  return servicesWithCategories;
+}
+
+// 全フィールド取得（詳細ページ・管理画面用）
 export async function getServices(): Promise<ServiceItem[]> {
 
   const supabase = getSupabase();
