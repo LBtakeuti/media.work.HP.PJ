@@ -1,13 +1,11 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import Image from "next/image";
-import { getNews, getServices } from "@/lib/supabase-data";
-import SmallNewsCard from "@/components/SmallNewsCard";
-import ServiceCard from "@/components/ServiceCard";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 import AnimatedTitle from "@/components/AnimatedTitle";
-import AnimatedSectionTitle from "@/components/AnimatedSectionTitle";
 import type { Metadata } from "next";
+import HomeServices, { HomeServicesSkeleton } from "./HomeServices";
+import HomeNews, { HomeNewsSkeleton } from "./HomeNews";
 
 // ISR: 60秒間キャッシュし、バックグラウンドで再生成
 export const revalidate = 60;
@@ -22,9 +20,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
-  const [newsItems, services] = await Promise.all([getNews(), getServices()]);
-  const latestNews = newsItems.slice(0, 4); // 最新4件を表示
+export default function Home() {
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -41,7 +37,7 @@ export default async function Home() {
             unoptimized={false}
           />
         </div>
-        
+
         {/* Content */}
         <div className="relative z-10 h-full flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -117,117 +113,15 @@ export default async function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
       </section>
 
-      {/* Services Section */}
-      <section className="pt-20 pb-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <AnimatedSectionTitle className="text-3xl md:text-4xl font-bold text-[#1e3a5f]">
-              サービス<span className="text-xl md:text-2xl font-normal ml-2">/SERVICE</span>
-            </AnimatedSectionTitle>
-            <Link
-              href="/services"
-              className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
-            >
-              もっと見る
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-          {(() => {
-            const fullRows = Math.floor(services.length / 4);
-            const remainder = services.length % 4;
-            const topServices = services.slice(0, fullRows * 4);
-            const bottomServices = services.slice(fullRows * 4);
+      {/* Services Section with Suspense */}
+      <Suspense fallback={<HomeServicesSkeleton />}>
+        <HomeServices />
+      </Suspense>
 
-            return (
-              <>
-                {/* 上段: 4列グリッド */}
-                {topServices.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {topServices.map((service) => (
-                      <ServiceCard
-                        key={service.id}
-                        title={service.title}
-                        categories={service.categories}
-                        imageSrc={service.image}
-                        imageAlt={service.title}
-                        href={`/services/${service.slug || service.id}`}
-                        imageDisplayMode={service.image_display_mode}
-                        size="small"
-                      />
-                    ))}
-                  </div>
-                )}
-                {/* 下段: 中央揃え（上段と同じコンポーネントとスタイル） */}
-                {bottomServices.length > 0 && (
-                  <>
-                    {/* モバイル: 2列グリッド */}
-                    <div className="grid grid-cols-2 gap-4 mt-4 md:hidden">
-                      {bottomServices.map((service) => (
-                        <ServiceCard
-                          key={service.id}
-                          title={service.title}
-                          categories={service.categories}
-                          imageSrc={service.image}
-                          imageAlt={service.title}
-                          href={`/services/${service.slug || service.id}`}
-                          imageDisplayMode={service.image_display_mode}
-                          size="small"
-                        />
-                      ))}
-                    </div>
-                    {/* PC: flexboxで中央揃え */}
-                    <div className="hidden md:flex justify-center items-start gap-4 mt-4">
-                      {bottomServices.map((service) => (
-                        <ServiceCard
-                          key={service.id}
-                          title={service.title}
-                          categories={service.categories}
-                          imageSrc={service.image}
-                          imageAlt={service.title}
-                          href={`/services/${service.slug || service.id}`}
-                          imageDisplayMode={service.image_display_mode}
-                          size="small"
-                          className="flex-shrink-0 w-[calc(25%-12px)]"
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </>
-            );
-          })()}
-        </div>
-      </section>
-
-      {/* News Section */}
-      <section className="pt-8 pb-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <AnimatedSectionTitle className="text-3xl md:text-4xl font-bold text-[#1e3a5f]">
-              ニュース<span className="text-xl md:text-2xl font-normal ml-2">/NEWS</span>
-            </AnimatedSectionTitle>
-            <Link
-              href="/news"
-              className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
-            >
-              もっと見る
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {latestNews.map((item) => (
-              <SmallNewsCard key={item.id} item={item} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-
+      {/* News Section with Suspense */}
+      <Suspense fallback={<HomeNewsSkeleton />}>
+        <HomeNews />
+      </Suspense>
     </div>
   );
 }
-
